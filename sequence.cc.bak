@@ -1,0 +1,343 @@
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <type_traits>
+#include <utility>
+
+#include <cstdio>
+#include <cassert>
+
+/** @file sequence.cc */
+
+// TODO:
+// czy muszę sprawdzać czy inner jest nullem, nigdzie tego nie robią
+
+/**
+ * @class DeepCpPtr
+ * std::unique_ptr wrapper allowing for copying owned value
+ */
+template <typename T>
+struct DeepCpPtr {
+    using Inner   = std::unique_ptr<T>;
+    using Pointer = typename Inner::pointer;
+
+    Inner inner;
+
+    constexpr DeepCpPtr() = default;
+    constexpr DeepCpPtr(std::nullptr_t) : inner {} {}
+
+    explicit DeepCpPtr(Pointer p) : inner { p } {}
+    
+    DeepCpPtr(DeepCpPtr&&) = default;
+    DeepCpPtr(Inner&& other) : inner { std::move(other) } {}
+
+    auto operator =(DeepCpPtr&& rhs) -> DeepCpPtr& {
+        inner = std::move(rhs.inner);
+        return *this;
+    }
+
+    DeepCpPtr(DeepCpPtr const& other)
+        : inner { other.inner ? new T { *other.inner } : nullptr } {}
+    DeepCpPtr(Inner const& other)
+        : inner { other ? new T { *other } : nullptr } {}
+
+    auto operator =(DeepCpPtr const& rhs) -> DeepCpPtr& {
+        inner.reset(rhs.inner ? new T { *rhs.inner } : nullptr);
+        return *this;
+    }
+};
+
+/**
+ * @fn make_deepcp
+ * helper function for creating DeepCpPtr instances,
+ * analogous to std::make_uniuqe
+ * @tparam T to which DeepCpPtr holds pointer
+ * @tparam Args types of arguments to the function
+ * @param [in] args arguments for T constructor
+ * @return instance of DeepCpPtr<T> created with args
+ */
+template <typename T, typename... Args>
+auto make_deepcp(Args&&... args) -> DeepCpPtr<T> {
+    return DeepCpPtr<T> { new T { std::forward<Args>(args)... } };
+}
+
+template <typename Key, typename Info>
+struct Sequence {
+    /**
+     * @class Node
+     * used as a node of a Sequence
+     */
+    struct Node {
+        using Elem = std::pair<Key, Info>;
+
+        template <typename Key_, typename Info_>
+        Node(Key_&& k, Info_&& i)
+            : elem_ { std::forward<Key_>(k), std::forward<Info_>(i) }
+            , next_ {}
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        Node(Elem const& elem)
+            : elem_ { elem }
+            , next_ {}
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        Node(Elem&& elem)
+            : elem_ { std::move(elem) }
+            , next_ {}
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        template <typename Key_, typename Info_, typename... Ts>
+        Node(Key_&& k, Info_&& i, Ts&&... vs)
+            : elem_ { std::forward<Key_>(k), std::forward<Info_>(i) }
+            , next_ { make_deepcp<Node>(std::forward<Ts>(vs)...) }
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        template <typename... Ts>
+        Node(Elem const& elem, Ts&&... vs)
+            : elem_ { elem }
+            , next_ { make_deepcp<Node>(std::forward<Ts>(vs)...) }
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        template <typename... Ts>
+        Node(Elem&& elem, Ts&&... vs)
+            : elem_ { std::move(elem) }
+            , next_ { make_deepcp<Node>(std::forward<Ts>(vs)...) }
+        { std::puts(__PRETTY_FUNCTION__); print(); }
+
+        Node(Node const&) = default;
+        Node(Node&&)      = default;
+
+        auto print() const -> void {
+            std::cout << elem_.first << ", " << elem_.second;
+        }
+
+        auto elem() const -> Elem const& { return elem_; }
+        auto elem()       -> Elem&       { return elem_; }
+
+        auto next() const -> DeepCpPtr<Node> const& { return next_; }
+        auto next()       -> DeepCpPtr<Node>&       { return next_; }
+
+    private:
+        Elem            elem_;
+        DeepCpPtr<Node> next_ = nullptr;
+    };
+
+    Sequence() = default;
+
+    template <typename T, typename... Ts,
+              typename = std::enable_if_t<
+                  sizeof...(Ts) != 0 || !std::is_same_v<
+                      std::remove_reference_t<T>,
+                      Sequence
+                      >
+                  >
+              >
+    Sequence(T&& t, Ts&&... vs)
+        : head_ { make_deepcp<Node>(std::forward<T>(t),
+                                    std::forward<Ts>(vs)...) }
+    {}
+
+    Sequence(Sequence const& other) : head_ { other.head_ } {}
+
+    Sequence(Sequence&& other) : head_ { std::move(other.head_) } {}
+
+    auto empty() const -> bool { return !head_.inner; }
+
+    auto size() const -> decltype(auto) {
+        return std::distance(this->begin(), this->end());
+    }
+
+    auto clear() -> void {
+        head_.inner.reset();
+    }
+
+    auto print() const -> void {
+        if (empty()) { return; }
+        std::cout << "head ";
+        for (auto const& [key, info] : *this) {
+            std::cout << " -> " << key << ", " << info;
+        }
+
+        std::cout << '\n';
+    }
+
+    // insercje do środka
+    // usuwanie
+    // sortowanie
+    // dostawanie: przez klucz, przez info, przez functor?
+
+    // repeating iterator
+
+    // insert
+    // erase
+    // push_back
+    // pop_back
+    // push_front
+    // pop_front
+    
+    // merge
+    // splice
+    // remove / remove_if
+    // reverse
+    // unque
+    // sort
+
+    /**
+     * returns reference to last node, fires assertion if sequence is empty.
+     * @return reference to last node in sequence
+     */
+    auto last() const -> Node const& {
+        assert(!empty() && "using last on empty list");
+        auto node = std::cref(head_);
+        while (node.get().inner->next().inner) {
+            node = node.get().inner->next();
+        }
+        return *node.get().inner;
+    }
+
+    /**
+     * returns reference to last node, fires assertion if sequence is empty.
+     * @return reference to last node in sequence
+     */
+    auto last() -> Node& {
+        return const_cast<Node&>(const_cast<Sequence const*>(this)->last());
+    }
+
+    /**
+     * inserts a sequence or a single node in front of the sequence.
+     * on empty sequence equivalent to append
+     * @see append
+     * @tparam Ts types of arguments
+     * @param vs arguments to create sequence / node
+     * @return self
+     */
+    template <typename... Ts>
+    auto insert(Ts&&... vs) -> Sequence& {
+        auto seq = Sequence { std::forward<Ts>(vs)... };
+        if (empty()) {
+            head_ = seq.head_;
+        } else {
+            seq.last().next() = DeepCpPtr<Node> { head_.inner.release() };
+            head_             = DeepCpPtr<Node> { seq.head_.inner.release() };
+        }
+        return *this;
+    }
+
+    /**
+     * appends a sequence or a single node at the end of the sequence.
+     * on empty sequence equivalent to insert
+     * @see insert
+     * @tparam Ts types of arguments
+     * @param vs arguments to create sequence / node
+     * @return self
+     */
+    template <typename... Ts>
+    auto append(Ts&&... vs) -> Sequence& {
+        auto seq = Sequence { std::forward<Ts>(vs)... };
+        if (empty()) {
+            head_ = seq.head_;
+        } else {
+            last().next() = seq.head_;
+        }
+        return *this;
+    }
+
+    /**
+     * @class Iterator
+     * type used to iterate non-const Sequence
+     */
+    struct Iterator {
+        std::reference_wrapper<DeepCpPtr<Node>> elem_;
+
+        auto operator ++() -> Iterator& {
+            // TODO: cdr?
+            elem_ = elem_.get().inner->next_;
+            return *this;
+        }
+
+        auto operator *() const -> std::pair<Key, Info>& {
+            return elem_.get().inner->elem_;
+        }
+    };
+    auto begin() -> Iterator { return Iterator { head_ }; }
+
+    struct IterEnd {};
+    auto end() -> IterEnd { return IterEnd {}; }
+
+    friend auto operator !=(Iterator const& iter, IterEnd const&) -> bool {
+        return iter.elem_.get() != nullptr;
+    }
+
+    /**
+     * @class ConstIterator
+     * type used to iterate const Sequence
+     */
+    struct ConstIterator {
+        std::reference_wrapper<DeepCpPtr<Node> const> elem_;
+
+        auto operator ++() -> ConstIterator& {
+            elem_ = elem_.get().inner->next();
+            return *this;
+        }
+
+        auto operator *() const -> std::pair<Key, Info> const& {
+            return elem_.get().inner->elem();
+        }
+    };
+    auto begin() const -> ConstIterator { return ConstIterator { head_ }; }
+    auto end() const -> IterEnd { return IterEnd {}; }
+
+    friend auto operator !=(ConstIterator const& iter, IterEnd const&) -> bool {
+        return iter.elem_.get().inner != nullptr;
+    }
+
+private:
+    DeepCpPtr<Node> head_ = nullptr;
+};
+
+/**
+ * @fn make_seq
+ * helper funciton for creating Sequence instances.
+ * @tparam Key type of Sequence's key
+ * @tparam Info type of Sequence's info
+ * @tparam Ts types of rest of arguments
+ * @param [in] k value to initialize first key
+ * @param [in] i value to initialize first info
+ * @param [in] vs arguments to initialize rest of sequence
+ * @return instance of Sequence
+ */
+template <typename Key, typename Info, typename... Ts>
+auto make_seq(Key&& k, Info&& i, Ts&&... vs) -> decltype(auto) {
+    return Sequence<std::remove_reference_t<Key>, std::remove_reference_t<Info>>
+    { std::forward<Key>(k), std::forward<Info>(i), std::forward<Ts>(vs)... };
+}
+
+auto main() -> int {
+    // dynamic programming
+    // make change (Weiss)
+    // jak parę z dedukowanymi typami naprawić
+
+    {
+        auto seq = make_seq(1, 1);
+        seq.print();
+        seq.insert(0, 0).append(2, 2);
+        seq.print();
+    }
+
+    {
+        auto seq = make_seq(1, 1);
+        auto _0  = make_seq(0, 0);
+        auto _2  = make_seq(2, 2);
+        seq.print();
+        seq.append(_0).insert(std::move(_2));
+        seq.print();
+    }
+
+    {
+        auto seq = Sequence<int, int> {};
+        seq.print();
+        seq.append(0, 0).append(1, 1).insert(2, 2);
+        seq.print();
+    }
+}

@@ -1,0 +1,60 @@
+\hypertarget{structOwningPtr}{}\section{Owning\+Ptr$<$ T $>$ Class Template Reference}
+\label{structOwningPtr}\index{OwningPtr$<$ T $>$@{OwningPtr$<$ T $>$}}
+
+
+std\+::unique\+\_\+ptr wrapper allowing for copying owned value  
+
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structOwningPtr_a9364e9b341ef0ad4f6b92763bdc7e733}\label{structOwningPtr_a9364e9b341ef0ad4f6b92763bdc7e733}} 
+using {\bfseries Inner} = std\+::unique\+\_\+ptr$<$ T $>$
+\item 
+\mbox{\Hypertarget{structOwningPtr_a9d2a5e85b4c0da8949b4bbe541ddb333}\label{structOwningPtr_a9d2a5e85b4c0da8949b4bbe541ddb333}} 
+using {\bfseries Pointer} = typename Inner\+::pointer
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structOwningPtr_adbb53c4a73964a43c4483079e3a81a58}\label{structOwningPtr_adbb53c4a73964a43c4483079e3a81a58}} 
+constexpr {\bfseries Owning\+Ptr} (std\+::nullptr\+\_\+t)
+\item 
+\mbox{\Hypertarget{structOwningPtr_a448f31015c5de294bf6abccebc6a9815}\label{structOwningPtr_a448f31015c5de294bf6abccebc6a9815}} 
+{\bfseries Owning\+Ptr} (Pointer p)
+\item 
+\mbox{\Hypertarget{structOwningPtr_ab8df796c4042fcc3e4d074449c3db56b}\label{structOwningPtr_ab8df796c4042fcc3e4d074449c3db56b}} 
+{\bfseries Owning\+Ptr} (\mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} \&\&)=default
+\item 
+\mbox{\Hypertarget{structOwningPtr_a17b0b986617990da45f9589f4eb3a289}\label{structOwningPtr_a17b0b986617990da45f9589f4eb3a289}} 
+{\bfseries Owning\+Ptr} (Inner \&\&other)
+\item 
+\mbox{\Hypertarget{structOwningPtr_a7c03786b2b6842e37b35aee4d2e2a5f1}\label{structOwningPtr_a7c03786b2b6842e37b35aee4d2e2a5f1}} 
+auto {\bfseries operator=} (\mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} \&\&rhs) -\/$>$ \mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} \&
+\item 
+\mbox{\Hypertarget{structOwningPtr_a0ff1dddf9d85640a5b61e138694c2a52}\label{structOwningPtr_a0ff1dddf9d85640a5b61e138694c2a52}} 
+{\bfseries Owning\+Ptr} (\mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} const \&other)
+\item 
+\mbox{\Hypertarget{structOwningPtr_a8508c230748eab20127521584348cb35}\label{structOwningPtr_a8508c230748eab20127521584348cb35}} 
+{\bfseries Owning\+Ptr} (Inner const \&other)
+\item 
+\mbox{\Hypertarget{structOwningPtr_a1ab68b0a404225c64fa4d85dd10955dc}\label{structOwningPtr_a1ab68b0a404225c64fa4d85dd10955dc}} 
+auto {\bfseries operator=} (\mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} const \&rhs) -\/$>$ \mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}} \&
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structOwningPtr_a8969ca5cf7352c35d56cccd60c183c88}\label{structOwningPtr_a8969ca5cf7352c35d56cccd60c183c88}} 
+Inner {\bfseries inner}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$\newline
+class Owning\+Ptr$<$ T $>$}
+
+std\+::unique\+\_\+ptr wrapper allowing for copying owned value 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{sequence_8cc}{sequence.\+cc}}\end{DoxyCompactItemize}

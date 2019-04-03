@@ -1,0 +1,51 @@
+\hypertarget{structSequence_1_1Iterator}{}\section{Sequence$<$ Key, Info $>$\+::Iterator Class Reference}
+\label{structSequence_1_1Iterator}\index{Sequence$<$ Key, Info $>$::Iterator@{Sequence$<$ Key, Info $>$::Iterator}}
+
+
+type used to iterate non-\/const \mbox{\hyperlink{structSequence}{Sequence}}  
+
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a4ccc86483dd16377949d5a0ef0f75374}\label{structSequence_1_1Iterator_a4ccc86483dd16377949d5a0ef0f75374}} 
+using {\bfseries iterator\+\_\+category} = std\+::forward\+\_\+iterator\+\_\+tag
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a3fc63bdb6aefbbad7940485736bd2193}\label{structSequence_1_1Iterator_a3fc63bdb6aefbbad7940485736bd2193}} 
+using {\bfseries value\+\_\+type} = typename Node\+::\+Elem
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a6a1dd9d0ad1783202a99949175334c89}\label{structSequence_1_1Iterator_a6a1dd9d0ad1783202a99949175334c89}} 
+using {\bfseries difference\+\_\+type} = std\+::ptrdiff\+\_\+t
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a18b3505ba96f4698b292c26c53d1455c}\label{structSequence_1_1Iterator_a18b3505ba96f4698b292c26c53d1455c}} 
+using {\bfseries pointer} = value\+\_\+type $\ast$
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a45255aef8105d5adedc35f951e09df79}\label{structSequence_1_1Iterator_a45255aef8105d5adedc35f951e09df79}} 
+using {\bfseries reference} = value\+\_\+type \&
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_a1c961d13dfe3e70f57374d7650422d64}\label{structSequence_1_1Iterator_a1c961d13dfe3e70f57374d7650422d64}} 
+auto {\bfseries operator++} () -\/$>$ \mbox{\hyperlink{structSequence_1_1Iterator}{Iterator}} \&
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_abc27dcfd690bd594ca54b862547e5436}\label{structSequence_1_1Iterator_abc27dcfd690bd594ca54b862547e5436}} 
+auto {\bfseries operator $\ast$} () const -\/$>$ reference
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structSequence_1_1Iterator_aac193e5e964435cb31f0408744a5115f}\label{structSequence_1_1Iterator_aac193e5e964435cb31f0408744a5115f}} 
+std\+::reference\+\_\+wrapper$<$ \mbox{\hyperlink{structOwningPtr}{Owning\+Ptr}}$<$ \mbox{\hyperlink{structSequence_1_1Node}{Node}} $>$ $>$ {\bfseries elem\+\_\+}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename Key, typename Info$>$\newline
+class Sequence$<$ Key, Info $>$\+::\+Iterator}
+
+type used to iterate non-\/const \mbox{\hyperlink{structSequence}{Sequence}} 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{sequence_8cc}{sequence.\+cc}}\end{DoxyCompactItemize}

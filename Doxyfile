@@ -1,0 +1,4 @@
+PROJECR_NAME        = "Sequence"
+JAVADOC_AUTOBRIEF   = YES
+GENERATE_LATEX      = YES
+USE_PDFLATEX        = YES

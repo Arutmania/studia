@@ -1,0 +1,60 @@
+\hypertarget{structDeepCpPtr}{}\section{Deep\+Cp\+Ptr$<$ T $>$ Class Template Reference}
+\label{structDeepCpPtr}\index{DeepCpPtr$<$ T $>$@{DeepCpPtr$<$ T $>$}}
+
+
+std\+::unique\+\_\+ptr wrapper allowing for copying owned value  
+
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a1353ba6af6e86abbda8b35fe7c1643ac}\label{structDeepCpPtr_a1353ba6af6e86abbda8b35fe7c1643ac}} 
+using {\bfseries Inner} = std\+::unique\+\_\+ptr$<$ T $>$
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a5855c213fb5568dd644005beaead0a9e}\label{structDeepCpPtr_a5855c213fb5568dd644005beaead0a9e}} 
+using {\bfseries Pointer} = typename Inner\+::pointer
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a64b7a88b4b06a0e8cc9500744c7537aa}\label{structDeepCpPtr_a64b7a88b4b06a0e8cc9500744c7537aa}} 
+constexpr {\bfseries Deep\+Cp\+Ptr} (std\+::nullptr\+\_\+t)
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_aa524c50ad0f92fd578ddda6b6bd5e9d4}\label{structDeepCpPtr_aa524c50ad0f92fd578ddda6b6bd5e9d4}} 
+{\bfseries Deep\+Cp\+Ptr} (Pointer p)
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a6783f0e2a4f458e912a3dd96d1cfc4c7}\label{structDeepCpPtr_a6783f0e2a4f458e912a3dd96d1cfc4c7}} 
+{\bfseries Deep\+Cp\+Ptr} (\mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} \&\&)=default
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a7f6462eda75b63adbf9b4a7057f2ae5a}\label{structDeepCpPtr_a7f6462eda75b63adbf9b4a7057f2ae5a}} 
+{\bfseries Deep\+Cp\+Ptr} (Inner \&\&other)
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a0887ec473c40c36621cef6976d5de9cb}\label{structDeepCpPtr_a0887ec473c40c36621cef6976d5de9cb}} 
+auto {\bfseries operator=} (\mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} \&\&rhs) -\/$>$ \mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} \&
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a97e439e69dd95777b9409f5397625861}\label{structDeepCpPtr_a97e439e69dd95777b9409f5397625861}} 
+{\bfseries Deep\+Cp\+Ptr} (\mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} const \&other)
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_a65f9219c3766b458a83409a271ff7f4b}\label{structDeepCpPtr_a65f9219c3766b458a83409a271ff7f4b}} 
+{\bfseries Deep\+Cp\+Ptr} (Inner const \&other)
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_aadccb31ffaf9762e1f65087651ae0871}\label{structDeepCpPtr_aadccb31ffaf9762e1f65087651ae0871}} 
+auto {\bfseries operator=} (\mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} const \&rhs) -\/$>$ \mbox{\hyperlink{structDeepCpPtr}{Deep\+Cp\+Ptr}} \&
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structDeepCpPtr_ae566f85af6669a34cfa9253eb417afe8}\label{structDeepCpPtr_ae566f85af6669a34cfa9253eb417afe8}} 
+Inner {\bfseries inner}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$\newline
+class Deep\+Cp\+Ptr$<$ T $>$}
+
+std\+::unique\+\_\+ptr wrapper allowing for copying owned value 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{sequence_8cc}{sequence.\+cc}}\end{DoxyCompactItemize}
