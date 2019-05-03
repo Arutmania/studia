@@ -35,12 +35,12 @@ struct OwningPtr {
     }
 
     OwningPtr(OwningPtr const& other)
-        : inner { other.inner ? new T { *other.inner } : nullptr } {}
+        : inner { other.inner ? new T(*other.inner) : nullptr } {}
     OwningPtr(Inner const& other)
-        : inner { other ? new T { *other } : nullptr } {}
+        : inner { other ? new T(*other) : nullptr } {}
 
     auto operator =(OwningPtr const& rhs) -> OwningPtr& {
-        inner.reset(rhs.inner ? new T { *rhs.inner } : nullptr);
+        inner.reset(rhs.inner ? new T(*rhs.inner) : nullptr);
         return *this;
     }
 };
@@ -53,7 +53,7 @@ struct OwningPtr {
  */
 template <typename T, typename... Args>
 auto make_owning(Args&&... args) -> OwningPtr<T> {
-    return OwningPtr<T> { new T { std::forward<Args>(args)... } };
+    return OwningPtr<T> { new T(std::forward<Args>(args)... ) };
 }
 
 /**
