@@ -65,24 +65,23 @@ struct Sequence {
         auto next() const -> OwningPtr<Node> const& { return next_; }
         auto next()       -> OwningPtr<Node>&       { return next_; }
 
-    private:
+        private:
         Elem            elem_;
         OwningPtr<Node> next_ = nullptr;
     };
 
     Sequence() = default;
 
-    template <typename T, typename... Ts,
-              typename = std::enable_if_t<
-                  sizeof...(Ts) != 0 || !std::is_same_v<
-                      std::remove_reference_t<T>,
-                      Sequence
-                      >
-                  >
-              >
+    template <typename T, typename... Ts, typename = std::enable_if_t<
+            sizeof...(Ts) != 0 || !std::is_same_v<
+                std::remove_reference_t<T>, Sequence
+            >
+        >
+    >
     Sequence(T&& t, Ts&&... vs)
-        : head_ { make_owning<Node>(std::forward<T>(t),
-                                    std::forward<Ts>(vs)...) }
+        : head_ {
+            make_owning<Node>(std::forward<T>(t), std::forward<Ts>(vs)...)
+        }
     {}
 
     Sequence(Sequence const&)                         = default;
@@ -102,7 +101,6 @@ struct Sequence {
         for (auto const& [key, info] : *this) {
             std::cout << " -> " << key << ", " << info;
         }
-
         std::cout << '\n';
     }
 
@@ -336,7 +334,7 @@ struct Sequence {
     auto get_elem_by(F const& func) -> typename Node::Elem& {
         return const_cast<typename Node::Elem&>(
             const_cast<Sequence const*>(this)->get_elem_by(func)
-            );
+        );
     }
 
     /**
