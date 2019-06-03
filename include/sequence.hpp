@@ -85,9 +85,10 @@ struct Sequence {
                                     std::forward<Ts>(vs)...) }
     {}
 
-    Sequence(Sequence const& other) : head_ { other.head_ } {}
-
-    Sequence(Sequence&& other) : head_ { std::move(other.head_) } {}
+    Sequence(Sequence const&)                         = default;
+    Sequence(Sequence&&) noexcept                     = default;
+    auto operator =(Sequence const&)     -> Sequence& = default;
+    auto operator =(Sequence&&) noexcept -> Sequence& = default;
 
     auto empty() const -> bool { return !head_; }
 
