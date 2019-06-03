@@ -1,103 +1,13 @@
+#pragma once
+
+#include <cassert>
 #include <functional>
 #include <iostream>
-#include <iterator>
-#include <memory>
 #include <type_traits>
-#include <utility>
 
-#include <cstdio>
-#include <cassert>
+#include "util.hpp"
 
-/** @file sequence.cc */
-
-/**
- * @class OwningPtr
- * std::unique_ptr wrapper allowing for copying owned value
- */
-template <typename T>
-struct OwningPtr {
-    using Inner   = std::unique_ptr<T>;
-    using Pointer = typename Inner::pointer;
-
-    Inner inner;
-
-    constexpr OwningPtr() = default;
-    constexpr OwningPtr(std::nullptr_t) : inner {} {}
-
-    explicit OwningPtr(Pointer p) : inner { p } {}
-    
-    OwningPtr(OwningPtr&&) = default;
-    OwningPtr(Inner&& other) : inner { std::move(other) } {}
-
-    auto operator =(OwningPtr&& rhs) -> OwningPtr& {
-        inner = std::move(rhs.inner);
-        return *this;
-    }
-
-    OwningPtr(OwningPtr const& other)
-        : inner { other.inner ? new T(*other.inner) : nullptr } {}
-    OwningPtr(Inner const& other)
-        : inner { other ? new T(*other) : nullptr } {}
-
-    auto operator =(OwningPtr const& rhs) -> OwningPtr& {
-        inner.reset(rhs.inner ? new T(*rhs.inner) : nullptr);
-        return *this;
-    }
-};
-
-/**
- * @fn make_owning
- * helper function for creating OwningPtr instances,
- * analogous to std::make_uniuqe
- * @return instance of OwningPtr<T> created with args
- */
-template <typename T, typename... Args>
-auto make_owning(Args&&... args) -> OwningPtr<T> {
-    return OwningPtr<T> { new T(std::forward<Args>(args)... ) };
-}
-
-/**
- * @class Repeat
- * looping iterator wrapper
- */
-template <typename Beg, typename End = Beg>
-struct Repeat {
-    Beg beginning_;
-    End end_;
-    Beg current_;
-
-    Repeat(Beg const& beginning, End const& end)
-        : beginning_(beginning)
-        , end_(end)
-        , current_(beginning) {}
-
-    using iterator_category = std::forward_iterator_tag;
-
-    using value_type        = typename Beg::value_type;
-    using difference_type   = typename Beg::difference_type;
-    using pointer           = typename Beg::pointer;
-    using reference         = typename Beg::reference;
-
-    auto operator ++() -> Repeat& {
-        if (++current_ == end_) { current_ = beginning_; }
-        return *this;
-    }
-
-    auto operator ++(int) -> Beg {
-        auto ret = current_;
-        this->operator ++();
-        return ret;
-    }
-
-    auto operator *() const -> reference {
-        return *current_;
-    }
-
-    template <typename T>
-    auto operator !=(T&&) -> bool { return true; }
-    template <typename T>
-    auto operator ==(T&&) -> bool { return false; }
-};
+/** @file sequence.hpp */
 
 template <typename Key, typename Info>
 struct Sequence {
@@ -179,10 +89,10 @@ struct Sequence {
 
     Sequence(Sequence&& other) : head_ { std::move(other.head_) } {}
 
-    auto empty() const -> bool { return !head_.inner; }
+    auto empty() const -> bool { return !head_; }
 
     auto clear() -> void {
-        head_.inner.reset();
+        head_.reset();
     }
 
     auto print() const -> void {
@@ -201,7 +111,7 @@ struct Sequence {
      */
     auto first() const -> Node const& {
         assert(!empty() && "using first on empty list");
-        return *head_.inner;
+        return *head_;
     }
 
     /**
@@ -219,10 +129,10 @@ struct Sequence {
     auto last() const -> Node const& {
         assert(!empty() && "using last on empty list");
         auto node = std::cref(head_);
-        while (node.get().inner->next().inner) {
-            node = node.get().inner->next();
+        while (node.get()->next()) {
+            node = node.get()->next();
         }
-        return *node.get().inner;
+        return *node.get();
     }
 
     /**
@@ -245,8 +155,8 @@ struct Sequence {
         if (empty()) {
             head_ = seq.head_;
         } else {
-            seq.last().next() = OwningPtr<Node> { head_.inner.release() };
-            head_             = OwningPtr<Node> { seq.head_.inner.release() };
+            seq.last().next() = OwningPtr<Node> { head_.release() };
+            head_             = OwningPtr<Node> { seq.head_.release() };
         }
         return *this;
     }
@@ -274,8 +184,8 @@ struct Sequence {
      */
     auto popf() -> typename Node::Elem {
         assert(!empty() && "popf on empty sequence");
-        auto ret = head_.inner->elem();
-        head_.inner.reset(head_.inner->next().inner.release());
+        auto ret = head_->elem();
+        head_.reset(head_->next().release());
         return ret;
     }
 
@@ -286,11 +196,11 @@ struct Sequence {
     auto popb() -> typename Node::Elem {
         assert(!empty() && "popb on empty sequence");
         auto node = std::ref(head_);
-        while (node.get().inner->next().inner) {
-            node = node.get().inner->next();
+        while (node.get()->next()) {
+            node = node.get()->next();
         }
-        auto ret = node.get().inner->elem();
-        node.get().inner.reset();
+        auto ret = node.get()->elem();
+        node.get().reset();
         return ret;
     }
 
@@ -304,16 +214,16 @@ struct Sequence {
         using difference_type   = std::ptrdiff_t;
         using pointer           = value_type*;
         using reference         = value_type&;
-        
+
         std::reference_wrapper<OwningPtr<Node>> elem_;
 
         auto operator ++() -> Iterator& {
-            elem_ = elem_.get().inner->next();
+            elem_ = elem_.get()->next();
             return *this;
         }
 
         auto operator *() const -> reference {
-            return elem_.get().inner->elem();
+            return elem_.get()->elem();
         }
     };
 
@@ -324,7 +234,7 @@ struct Sequence {
     auto end() -> IterEnd { return IterEnd {}; }
 
     friend auto operator !=(Iterator const& iter, IterEnd const&) -> bool {
-        return iter.elem_.get().inner != nullptr;
+        return iter.elem_.get() != nullptr;
     }
 
     friend auto operator ==(Iterator const& iter, IterEnd const&) -> bool {
@@ -345,12 +255,12 @@ struct Sequence {
         std::reference_wrapper<OwningPtr<Node> const> elem_;
 
         auto operator ++() -> ConstIterator& {
-            elem_ = elem_.get().inner->next();
+            elem_ = elem_.get()->next();
             return *this;
         }
 
         auto operator *() const -> reference {
-            return elem_.get().inner->elem();
+            return elem_.get()->elem();
         }
     };
 
@@ -359,7 +269,7 @@ struct Sequence {
     auto end() const -> IterEnd { return IterEnd {}; }
 
     friend auto operator !=(ConstIterator const& iter, IterEnd const&) -> bool {
-        return iter.elem_.get().inner != nullptr;
+        return iter.elem_.get() != nullptr;
     }
 
     friend auto operator ==(ConstIterator const& iter, IterEnd const&) -> bool {
@@ -373,8 +283,8 @@ struct Sequence {
     template <typename... Ts>
     auto insert_at(Iterator const& iter, Ts&&... vs) -> Sequence& {
         auto seq = Sequence { std::forward<Ts>(vs)... };
-        seq.last().next() = OwningPtr<Node> { iter.elem_.get().inner.release() };
-        iter.elem_.get() = OwningPtr<Node> { seq.head_.inner.release() };
+        seq.last().next() = OwningPtr<Node> { iter.elem_.get().release() };
+        iter.elem_.get() = OwningPtr<Node> { seq.head_.release() };
         return *this;
     }
 
@@ -437,7 +347,7 @@ struct Sequence {
     auto remove_if(F const& func) -> Sequence& {
         auto it = get_iter_by(func);
         if (it != end()) {
-            it.elem_.get() = it.elem_.get().inner->next();
+            it.elem_.get() = it.elem_.get()->next();
         }
         return *this;
     }
