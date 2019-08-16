@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 
+namespace util {
 /**
  * @class OwningPtr
  * std::unique_ptr wrapper allowing for copying owned value
@@ -67,9 +68,9 @@ struct Repeat {
         return *this;
     }
 
-    auto operator ++(int) -> Beg {
-        auto ret = current_;
-        this->operator ++();
+    auto operator ++(int) -> Repeat {
+        auto ret = *this;
+        ++*this;
         return ret;
     }
 
@@ -82,4 +83,4 @@ struct Repeat {
     template <typename T>
     auto operator ==(T&&) -> bool { return false; }
 };
-
+}

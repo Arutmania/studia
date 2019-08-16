@@ -9,6 +9,7 @@
 
 /** @file sequence.hpp */
 
+namespace seq {
 template <typename Key, typename Info>
 struct Sequence {
     /**
@@ -37,19 +38,19 @@ struct Sequence {
         template <typename Key_, typename Info_, typename... Ts>
         Node(Key_&& k, Info_&& i, Ts&&... vs)
             : elem_ { std::forward<Key_>(k), std::forward<Info_>(i) }
-            , next_ { make_owning<Node>(std::forward<Ts>(vs)...) }
+            , next_ { util::make_owning<Node>(std::forward<Ts>(vs)...) }
         {}
 
         template <typename... Ts>
         Node(Elem const& elem, Ts&&... vs)
             : elem_ { elem }
-            , next_ { make_owning<Node>(std::forward<Ts>(vs)...) }
+            , next_ { util::make_owning<Node>(std::forward<Ts>(vs)...) }
         {}
 
         template <typename... Ts>
         Node(Elem&& elem, Ts&&... vs)
             : elem_ { std::move(elem) }
-            , next_ { make_owning<Node>(std::forward<Ts>(vs)...) }
+            , next_ { util::make_owning<Node>(std::forward<Ts>(vs)...) }
         {}
 
         Node(Node const&) = default;
@@ -62,12 +63,12 @@ struct Sequence {
         auto elem() const -> Elem const& { return elem_; }
         auto elem()       -> Elem&       { return elem_; }
 
-        auto next() const -> OwningPtr<Node> const& { return next_; }
-        auto next()       -> OwningPtr<Node>&       { return next_; }
+        auto next() const -> util::OwningPtr<Node> const& { return next_; }
+        auto next()       -> util::OwningPtr<Node>&       { return next_; }
 
         private:
         Elem            elem_;
-        OwningPtr<Node> next_ = nullptr;
+        util::OwningPtr<Node> next_ = nullptr;
     };
 
     Sequence() = default;
@@ -80,7 +81,7 @@ struct Sequence {
     >
     Sequence(T&& t, Ts&&... vs)
         : head_ {
-            make_owning<Node>(std::forward<T>(t), std::forward<Ts>(vs)...)
+            util::make_owning<Node>(std::forward<T>(t), std::forward<Ts>(vs)...)
         }
     {}
 
@@ -154,8 +155,8 @@ struct Sequence {
         if (empty()) {
             head_ = seq.head_;
         } else {
-            seq.last().next() = OwningPtr<Node> { head_.release() };
-            head_             = OwningPtr<Node> { seq.head_.release() };
+            seq.last().next() = util::OwningPtr<Node> { head_.release() };
+            head_             = util::OwningPtr<Node> { seq.head_.release() };
         }
         return *this;
     }
@@ -170,7 +171,7 @@ struct Sequence {
     auto append(Ts&&... vs) -> Sequence& {
         auto seq = Sequence { std::forward<Ts>(vs)... };
         if (empty()) {
-            head_ = seq.head_;
+            head_         = seq.head_;
         } else {
             last().next() = seq.head_;
         }
@@ -214,7 +215,7 @@ struct Sequence {
         using pointer           = value_type*;
         using reference         = value_type&;
 
-        std::reference_wrapper<OwningPtr<Node>> elem_;
+        std::reference_wrapper<util::OwningPtr<Node>> elem_;
 
         auto operator ++() -> Iterator& {
             elem_ = elem_.get()->next();
@@ -251,7 +252,7 @@ struct Sequence {
         using pointer           = value_type const*;
         using reference         = value_type const&;
 
-        std::reference_wrapper<OwningPtr<Node> const> elem_;
+        std::reference_wrapper<util::OwningPtr<Node> const> elem_;
 
         auto operator ++() -> ConstIterator& {
             elem_ = elem_.get()->next();
@@ -282,8 +283,8 @@ struct Sequence {
     template <typename... Ts>
     auto insert_at(Iterator const& iter, Ts&&... vs) -> Sequence& {
         auto seq = Sequence { std::forward<Ts>(vs)... };
-        seq.last().next() = OwningPtr<Node> { iter.elem_.get().release() };
-        iter.elem_.get() = OwningPtr<Node> { seq.head_.release() };
+        seq.last().next() = util::OwningPtr<Node> { iter.elem_.get().release() };
+        iter.elem_.get()  = util::OwningPtr<Node> { seq.head_.release() };
         return *this;
     }
 
@@ -312,7 +313,7 @@ struct Sequence {
         }
         return it;
     }
-    
+
     /**
      * returns elem for which func returned true.
      * if no such elem exists fires assertion
@@ -352,7 +353,7 @@ struct Sequence {
     }
 
 private:
-    OwningPtr<Node> head_ = nullptr;
+    util::OwningPtr<Node> head_ = nullptr;
 };
 
 /**
@@ -364,6 +365,7 @@ template <typename Key, typename Info, typename... Ts>
 auto make_seq(Key&& k, Info&& i, Ts&&... vs) -> decltype(auto) {
     return Sequence<std::remove_reference_t<Key>, std::remove_reference_t<Info>>
     { std::forward<Key>(k), std::forward<Info>(i), std::forward<Ts>(vs)... };
+}
 }
 
 // Local Variables:

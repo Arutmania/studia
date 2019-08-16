@@ -1,18 +1,20 @@
+#include <functional>
+
 #include "../include/sequence.hpp"
 
 template <typename Key, typename Info>
-auto produce(Sequence<Key, Info> const& a, uint start_a, uint len_a,
-             Sequence<Key, Info> const& b, uint start_b, uint len_b, uint limit)
-    -> Sequence<Key, Info> {
+auto produce(seq::Sequence<Key, Info> const& a, uint start_a, uint len_a,
+             seq::Sequence<Key, Info> const& b, uint start_b, uint len_b, uint limit)
+    -> seq::Sequence<Key, Info> {
 
 
-    auto ita = Repeat(a.begin(), a.end());
+    auto ita = util::Repeat(a.begin(), a.end());
     std::advance(ita, start_a);
 
-    auto itb = Repeat(b.begin(), b.end());
+    auto itb = util::Repeat(b.begin(), b.end());
     std::advance(itb, start_b);
 
-    auto ret = Sequence<Key, Info> {};
+    auto ret = seq::Sequence<Key, Info> {};
 
     while (true) {
         for (auto i = 0U; i < len_a; ++i) {
@@ -28,14 +30,34 @@ auto produce(Sequence<Key, Info> const& a, uint start_a, uint len_a,
 }
 
 auto main() -> int {
-    produce(make_seq(10, 10, 20, 20, 30, 30, 40, 40, 50, 50, 60, 60, 70, 70, 80, 80),
-            2, 2,
-            make_seq(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9),
-            1, 3, 11).print();
+    auto left = seq::make_seq(
+        10, 10,
+        20, 20,
+        30, 30,
+        40, 40,
+        50, 50,
+        60, 60,
+        70, 70,
+        80, 80
+    );
+
+    auto right = seq::make_seq(
+        1, 1,
+        2, 2,
+        3, 3,
+        4, 4,
+        5, 5,
+        6, 6,
+        7, 7,
+        8, 8,
+        9, 9
+    );
+
+    produce(left, 2, 2, right, 1, 3, 11).print();
 
 
     {
-        auto seq = Sequence<int, int> {};
+        auto seq = seq::Sequence<int, int> {};
         assert(seq.empty() && "seq should be empty");
 
         seq.clear();
@@ -65,19 +87,36 @@ auto main() -> int {
 
         seq.print();
 
-        seq.remove_if([] (auto const&) { return true; });
-        seq.remove_if([] (auto const&) { return false; });
+        auto accept = [] (auto const&) {
+            return true;
+        };
+
+        auto decline = std::not_fn(accept);
+
+        seq.remove_if(accept);
+        seq.remove_if(decline);
 
         seq.print();
 
         seq.first().print();
+        std::cout << '\n';
+
         seq.last().print();
+        std::cout << '\n';
 
         seq.clear();
         seq.append(0, 0);
         seq.popb();
         seq.insert(0, 0);
         seq.popf();
+
+        seq.insert(0, 0).insert(1, 1).insert(2, 2);
+
+        auto copy = seq::Sequence<int, int> { seq };
+        copy.print();
+
+        auto move = seq::Sequence<int, int> { std::move(copy) };
+        move.print();
     }
 }
 
