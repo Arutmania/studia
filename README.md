@@ -1,2 +1,2 @@
-# sequence
-simple template linked list made for cs laboratories
+# data-structures
+simple data structures usinng modern c++ made for CS course
