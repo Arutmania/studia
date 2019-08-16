@@ -1,2 +1,2 @@
 # data-structures
-simple data structures usinng modern c++ made for CS course
+simple data structures using modern c++ made for CS course
