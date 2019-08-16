@@ -5,6 +5,11 @@
 #include <utility>
 
 namespace util {
+template <typename T>
+struct type_identity {
+    using type = T;
+};
+
 /**
  * @class OwningPtr
  * std::unique_ptr wrapper allowing for copying owned value

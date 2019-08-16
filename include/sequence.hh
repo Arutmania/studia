@@ -5,7 +5,7 @@
 #include <iostream>
 #include <type_traits>
 
-#include "util.hpp"
+#include "util.hh"
 
 /** @file sequence.hpp */
 

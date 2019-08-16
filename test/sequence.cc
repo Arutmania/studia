@@ -1,6 +1,6 @@
 #include <functional>
 
-#include "../include/sequence.hpp"
+#include "../include/sequence.hh"
 
 template <typename Key, typename Info>
 auto produce(seq::Sequence<Key, Info> const& a, uint start_a, uint len_a,

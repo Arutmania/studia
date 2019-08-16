@@ -1,4 +1,4 @@
-PROJECR_NAME        = "Sequence"
+PROJECR_NAME        = "data-structures"
 JAVADOC_AUTOBRIEF   = YES
 GENERATE_LATEX      = YES
 USE_PDFLATEX        = YES
