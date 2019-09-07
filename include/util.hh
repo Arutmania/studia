@@ -14,17 +14,17 @@ struct type_identity {
  * @class OwningPtr
  * std::unique_ptr wrapper allowing for copying owned value
  */
-template <typename T>
-struct OwningPtr : std::unique_ptr<T> {
-    using std::unique_ptr<T>::unique_ptr;
+template <typename T, typename D = typename std::unique_ptr<T>::deleter_type>
+struct OwningPtr : std::unique_ptr<T, D> {
+    using std::unique_ptr<T, D>::unique_ptr;
 
-    OwningPtr(std::unique_ptr<T> const& other)
-        : std::unique_ptr<T> { other ? new T(*other) : nullptr } {}
+    OwningPtr(std::unique_ptr<T, D> const& other)
+        : std::unique_ptr<T, D> { other ? new T(*other) : nullptr } {}
 
     OwningPtr(OwningPtr const& other)
-        : std::unique_ptr<T> { other ? new T(*other) : nullptr } {}
+        : std::unique_ptr<T, D> { other ? new T(*other) : nullptr } {}
 
-    auto operator =(std::unique_ptr<T> const& rhs) -> OwningPtr& {
+    auto operator =(std::unique_ptr<T, D> const& rhs) -> OwningPtr& {
         this->reset(rhs ? new T(*rhs) : nullptr);
         return *this;
     }
