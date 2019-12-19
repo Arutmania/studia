@@ -11,8 +11,11 @@ struct type_identity {
 };
 
 /**
- * @class OwningPtr
- * std::unique_ptr wrapper allowing for copying owned value
+ * @class   OwningPtr
+ * @brief   std::unique_ptr wrapper allowing for copying owned value
+ * @attention
+ *  don't store polymorphic values - copying slices as there is no way to know
+ *  what underlying type unique_ptr actually points to
  */
 template <typename T, typename D = typename std::unique_ptr<T>::deleter_type>
 struct OwningPtr : std::unique_ptr<T, D> {
