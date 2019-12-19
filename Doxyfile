@@ -1,4 +1,5 @@
 PROJECR_NAME        = "data-structures"
+INPUT               = "include"
 JAVADOC_AUTOBRIEF   = YES
 GENERATE_LATEX      = YES
 USE_PDFLATEX        = YES
