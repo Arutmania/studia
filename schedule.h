@@ -5,15 +5,18 @@
 #include <QMap>
 #include <QString>
 #include <QVector>
+#include <QStyledItemDelegate>
+#include <QDialog>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QComboBox>
 
 #include <array>
 
-// model should hold a schedule
-// selecting different room will change the schedule being held
-// by the model and send the update signal
 class ScheduleModel : public QAbstractTableModel {
     Q_OBJECT
-    // map from room to schedule
+
+public:
     struct TimeSlot {
         QString group_, class_, teacher_;
         auto isEmpty() const -> bool
@@ -22,19 +25,32 @@ class ScheduleModel : public QAbstractTableModel {
         { group_.clear(); class_.clear(); teacher_.clear(); }
     };
 
+private:
 
-    // TODO selecting in the drop down the room should signal this to change the selected room
-    QString room;
-
-    enum { NUM_DAYS = 5, NUM_TIMES = 10 };
+    enum { NUM_DAYS = 5, NUM_TIMES = 9 };
     using Day  = std::array<TimeSlot, NUM_TIMES>;
     using Week = std::array<Day, NUM_DAYS>;
 
     QMap<QString, Week> schedules;
 
 public:
+    QString room;
 
     using QAbstractTableModel::QAbstractTableModel;
+
+    auto setEntry(QString const& g, QString const& c, QString const& t, int row, int column) -> void {
+        if (row < NUM_TIMES || column < NUM_DAYS) {
+            for (auto& schedule : schedules)
+                if (auto& entry = schedule[column][row]; entry.group_ == g || entry.class_ == c || entry.teacher_ == t)
+                    entry.clear();
+            schedules[room][column][row] = { g, c, t };
+            emit dataChanged(index(row, column), index(row, column), { Qt::DisplayRole });
+        }
+    }
+
+    auto entry(int row, int column) const -> TimeSlot {
+        return schedules[room][column][row];
+    }
 
     auto rowCount(QModelIndex const& parent = QModelIndex())
     const -> int override {
@@ -56,8 +72,9 @@ public:
         if (role != Qt::DisplayRole)
             return QVariant {};
 
-        // TODO is this dangling - i don't think it is
-        auto const& slot = schedules[room][index.column()][index.row()];
+        // TODO why is this supposedly dangling (if auto const& would have been used)
+        //auto const& slot = schedules[room][index.column()][index.row()];
+        auto slot = schedules[room][index.column()][index.row()];
 
         if (slot.isEmpty())
             return QString {};
@@ -97,12 +114,48 @@ public:
         return QVariant {};
     }
 
+    void removeInvalidClasses(QStringList const& cs) {
+        // here we could try some more elaborate logic to only update the view when necessary and only the parts that changed but why bother
+        for (auto& schedule : schedules)
+            for (auto& day : schedule)
+                for (auto& slot : day)
+                    if (!cs.contains(slot.class_))
+                        slot.clear();
+        emit dataChanged(index(0, 0), index(NUM_TIMES - 1, NUM_DAYS - 1), { Qt::DisplayRole  });
+    }
+
+    void removeInvalidGroups(QStringList const& gs) {
+        for (auto& schedule : schedules)
+            for (auto& day : schedule)
+                for (auto& slot : day)
+                    if (!gs.contains(slot.group_))
+                        slot.clear();
+        emit dataChanged(index(0, 0), index(NUM_TIMES - 1, NUM_DAYS - 1), { Qt::DisplayRole  });
+    }
+
+    void removeInvalidRooms(QStringList const& rs) {
+        // TODO tutaj chyba nie muszę robić nic więcej bo room powinnien być updateowany przez combobox i też wtedy dataChanged jest emitowane
+        // pretty inefficient but you know whatever and I'm pretty sure no dangling iterators
+        for (auto const& key : schedules.keys())
+            if (!rs.contains(key))
+                schedules.remove(key);
+    }
+
+    void removeInvalidTeachers(QStringList const& ts) {
+        for (auto& schedule : schedules)
+            for (auto& day : schedule)
+                for (auto& slot : day)
+                    if (!ts.contains(slot.teacher_))
+                        slot.clear();
+        emit dataChanged(index(0, 0), index(NUM_TIMES - 1, NUM_DAYS - 1), { Qt::DisplayRole  });
+    }
+
 public slots:
     void setActiveRoom(QString const& r) {
         room = r;
         emit dataChanged(index(0, 0),
-             index(NUM_TIMES - 1, NUM_DAYS - 1),
-             { Qt::DisplayRole });
+            index(NUM_TIMES - 1, NUM_DAYS - 1),
+            { Qt::DisplayRole });
     }
 };
 

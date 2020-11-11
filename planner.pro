@@ -14,6 +14,7 @@ SOURCES += \
 
 HEADERS += \
     dictedit.h \
+    entryedit.h \
     mainwindow.h \
     schedule.h
 
