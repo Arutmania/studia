@@ -21,12 +21,6 @@
 #include <QPushButton>
 #include <QStringListModel>
 
-/*
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-*/
-
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -38,8 +32,9 @@ public:
 
         ui->comboBox->setModel(&rooms);
         ui->tableView->setModel(new ScheduleModel { this });
+        ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-        // jak nie ma pokoi to się jebie?
         connect(ui->comboBox,
                 &QComboBox::currentTextChanged,
                 static_cast<ScheduleModel*>(ui->tableView->model()),
@@ -165,6 +160,7 @@ public:
         if (teachers.stringList().empty())
             qDebug() << "required array \"teachers\" is empty or doesn't exist";
 
+        // activity from JSON also needs lists of entries that are allowed to exist
         schedule->activitiesFromJson(
             object["activities"].toArray(),
             rooms.stringList(),
@@ -195,7 +191,6 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    // list of: rooms, groups, classes, teachers
     QStringListModel rooms, groups, classes, teachers;
 };
 

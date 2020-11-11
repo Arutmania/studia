@@ -17,7 +17,6 @@ class DictEdit : public QDialog {
     QPushButton* add, * del, * sav;
 
 public:
-    // to powinno dostawać własny model i QDialog::accept powinno być połączone do update modelu i wzywającego - wtedy też usuwanie niemożliwych danych
     DictEdit(QStringListModel* model, QWidget* parent = nullptr)
         : QDialog(parent)
         , view(new QListView { this })
@@ -27,7 +26,6 @@ public:
         , sav(new QPushButton { "&Save", this })
     {
         view->setModel(new QStringListModel { originalModel->stringList(), this });
-        //view->setResizeMode(QListView::ResizeMode::Adjust);
 
         auto layout = new QVBoxLayout { this };
         layout->addWidget(view);
@@ -39,7 +37,6 @@ public:
             auto model = static_cast<QStringListModel*>(view->model());
             if (model->insertRow(model->rowCount())) {
                 auto index = model->index(model->rowCount() - 1);
-                //model->setData(index, "");
                 view->setCurrentIndex(index);
                 view->edit(index);
             }
@@ -60,13 +57,14 @@ public:
         connect(sav, &QPushButton::clicked, this, [this] {
            auto model = static_cast<QStringListModel*>(view->model());
            // ghetto remove duplicates
-           auto list = model->stringList();
            // WHY THE FUCK WOULD THIS SEGFAULT???
            //auto set = QSet<QString> { model->stringList().begin(), model->stringList().end() };
+           auto list = model->stringList();
            auto set = QSet<QString> { list.begin(), list.end() };
            list = QStringList { set.begin(), set.end() };
            // remove empty
            list.removeAll(QString {});
+           list.sort();
            originalModel->setStringList(list);
            accept();
         });
@@ -75,8 +73,6 @@ public:
         box->setLayout(buttons);
         layout->addWidget(box);
         setLayout(layout);
-
-        //adjustSize();
     }
 };
 

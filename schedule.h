@@ -46,7 +46,7 @@ public:
     auto setEntry(QString const& g, QString const& c, QString const& t, int row, int column) -> void {
         if (row < NUM_TIMES || column < NUM_DAYS) {
             for (auto& schedule : schedules)
-                //if (auto& entry = schedule[column][row]; entry.group_ == g || entry.class_ == c || entry.teacher_ == t)
+                // no one can be at two places at the same time
                 if (auto& entry = schedule[column][row]; entry.group_ == g || entry.teacher_ == t)
                     entry.clear();
             schedules[room][column][row] = { g, c, t };
@@ -140,7 +140,8 @@ public:
     }
 
     void removeInvalidRooms(QStringList const& rs) {
-        // TODO tutaj chyba nie muszę robić nic więcej bo room powinnien być updateowany przez combobox i też wtedy dataChanged jest emitowane
+        // current room doesn't have to be checked because it should be set by combobox
+        // because only non current rooms can be invalid the view doesn't need to refresh
         // pretty inefficient but you know whatever and I'm pretty sure no dangling iterators
         for (auto const& key : schedules.keys())
             if (!rs.contains(key))
@@ -161,10 +162,10 @@ public:
                             QStringList const& allowedGroups,
                             QStringList const& allowedClasses,
                             QStringList const& allowedTeachers) {
-        // loading should clear the existing values
+        // loading new values should clear the existing values
         schedules.clear();
 
-        // no new entries could be added
+        // no new entries could be added (because one of rooms, groups, teachers has no allowed values)
         if (allowedRooms.empty() || allowedGroups.empty() || allowedClasses.empty() || allowedTeachers.empty()) {
             // but already cleared
             emit dataChanged(index(0, 0), index(NUM_TIMES - 1, NUM_DAYS - 1), { Qt::DisplayRole });
