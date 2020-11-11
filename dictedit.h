@@ -1,13 +1,13 @@
 #ifndef DICTEDIT_H
 #define DICTEDIT_H
 
+#include <QDebug>
 #include <QDialog>
-#include <QStringListModel>
-#include <QListView>
-#include <QPushButton>
 #include <QDialogButtonBox>
 #include <QGridLayout>
-#include <QDebug>
+#include <QListView>
+#include <QPushButton>
+#include <QStringListModel>
 
 class DictEdit : public QDialog {
     Q_OBJECT

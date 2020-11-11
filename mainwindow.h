@@ -7,14 +7,19 @@
 #include "dictedit.h"
 #include "entryedit.h"
 
-#include <QMainWindow>
-#include <QStringListModel>
 #include <QAbstractTableModel>
-#include <QListView>
-#include <QPushButton>
-#include <QDialog>
-#include <QMessageBox>
 #include <QDebug>
+#include <QDialog>
+#include <QFile>
+#include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QListView>
+#include <QMainWindow>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QStringListModel>
 
 /*
 QT_BEGIN_NAMESPACE
@@ -39,6 +44,29 @@ public:
                 &QComboBox::currentTextChanged,
                 static_cast<ScheduleModel*>(ui->tableView->model()),
                 &ScheduleModel::setActiveRoom);
+
+        connect(ui->action_Load, &QAction::triggered, this, [this] {
+            auto filename = QFileDialog::getOpenFileName(this,
+                                                         "Load from JSON",
+                                                         ".",
+                                                         "JSON documents (*.json)");
+            if (filename.isNull())
+                return;
+            loadJson(filename);
+        });
+
+        connect(ui->action_Save, &QAction::triggered, this, [this] {
+            auto filename = QFileDialog::getSaveFileName(this,
+                                                         "Save to JSON",
+                                                         "."
+                                                         "JSON documents (*.json)");
+            // documentation doesn't seem to mention what happens when user cancels the dialog
+            // but extrapolating from what is said in the QFileDialog::getOpenFileName
+            // a null string is returned
+            if (filename.isNull())
+                return;
+            saveJson(filename);
+        });
 
         connect(ui->action_Classes, &QAction::triggered, this, [this] {
             auto de = new DictEdit { &classes, this };
@@ -92,6 +120,76 @@ public:
 
     ~MainWindow() {
         delete ui;
+    }
+
+    bool loadJson(QString const& filename) {
+        auto file = QFile { filename };
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qDebug() << QStringLiteral("couldn't open file: %1").arg(filename);
+            return false;
+        }
+        auto object = QJsonDocument::fromJson(file.readAll()).object();
+        file.close();
+
+        auto schedule = static_cast<ScheduleModel*>(ui->tableView->model());
+
+        auto toStringList = [] (auto const* arrayName, auto const& jsonArray) {
+            auto list = QStringList {};
+            for (auto const& elem : jsonArray) {
+                if (!elem.isString()) {
+                    qDebug() << QStringLiteral("elements of array %1 should be strings").arg(arrayName);
+                    continue;
+                }
+                list << elem.toString();
+            }
+            return list;
+        };
+
+        auto rooms_ = object["rooms"].toArray();
+        rooms.setStringList(toStringList("rooms", rooms_));
+        if (rooms.stringList().empty())
+            qDebug() << "required array \"rooms\" is empty or doesn't exist";
+
+        auto groups_ = object["groups"].toArray();
+        groups.setStringList(toStringList("groups", groups_));
+        if (groups.stringList().empty())
+            qDebug() << "required array \"groups\" is empty or doesn't exist";
+
+        auto classes_ = object["classes"].toArray();
+        classes.setStringList(toStringList("classes", classes_));
+        if (classes.stringList().empty())
+            qDebug() << "required array \"classes\" is empty or doesn't exist";
+
+        auto teachers_ = object["teachers"].toArray();
+        teachers.setStringList(toStringList("teachers", teachers_));
+        if (teachers.stringList().empty())
+            qDebug() << "required array \"teachers\" is empty or doesn't exist";
+
+        schedule->activitiesFromJson(
+            object["activities"].toArray(),
+            rooms.stringList(),
+            groups.stringList(),
+            classes.stringList(),
+            teachers.stringList()
+        );
+        return true;
+    }
+
+    bool saveJson(QString const& filename) {
+        auto object 	     = QJsonObject {};
+        object["rooms"]      = QJsonArray::fromStringList(rooms.stringList());
+        object["groups"]     = QJsonArray::fromStringList(groups.stringList());
+        object["classes"  ]  = QJsonArray::fromStringList(classes.stringList());
+        object["teachers"] 	 = QJsonArray::fromStringList(teachers.stringList());
+        object["activities"] = static_cast<ScheduleModel*>(ui->tableView->model())->activitiesToJson();
+
+        auto file = QFile { filename };
+        if (!file.open(QIODevice::WriteOnly)) {
+            qDebug() << QStringLiteral("couldn't open %1 for writing").arg(filename);
+            return false;
+        }
+        file.write(QJsonDocument(object).toJson());
+        return true;
     }
 
 private:

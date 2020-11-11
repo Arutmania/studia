@@ -1,13 +1,13 @@
 #ifndef ENTRYEDIT_H
 #define ENTRYEDIT_H
 
-#include <QDialog>
-#include <QStringListModel>
 #include <QComboBox>
+#include <QDebug>
+#include <QDialog>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QDebug>
+#include <QStringListModel>
 
 #include "schedule.h"
 
