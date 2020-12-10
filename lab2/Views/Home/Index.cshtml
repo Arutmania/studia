@@ -1,0 +1,60 @@
+﻿@using System;
+@using System.Collections.Generic;
+
+@model ScheduleModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="form-group">
+    <form asp-action="SetRoom" method="post">
+        <label for="room">room</label>
+        <select
+            id="room" 
+            asp-items=@Model.Rooms 
+            name="room" id="dropdown" 
+            onchange="this.form.submit();"> 
+        </select>
+    </form>
+</div>
+
+@* @if (!Model.IsRoomSelected) {
+    @section scripts {
+        <script type="text/javascript">
+            $('#dropdown').empty();
+        </script>
+    }
+} *@
+
+<div class="center container-fluid table-responsive">
+    <table class="table table-default table-fixed">
+        <tr>
+            <th></th> @* empty cell *@
+            @foreach (var d in Model.Days) {
+                <th class="text-center" style="width: (100/6)%">@d</th>
+            }
+        </tr>
+        @foreach (var (t, i) in Model.Times.Select((e, i) => (e, i))) {
+            <tr>
+            <th>@t</th>
+            @foreach (var (d, j) in Model.Days.Select((e, i) => (e, i))) {
+                <td class="text-center">
+                    @if (Model.IsRoomSelected) {
+                        <a 
+                            class="btn btn-block"
+                            asp-action="Slot" method="post"
+                            asp-route-room=@Model.Rooms.SelectedValue 
+                            asp-route-time=@i asp-route-day=@j
+                            class="btn btn-block">
+                            @Model.Schedule[i, j].Lecture
+                        </a>
+                    } else {
+                        <a class="btn btn-block disabled"/>
+                    }
+                </td>
+            }
+            </tr>
+        }
+    </table>
+</div>

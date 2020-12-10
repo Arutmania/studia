@@ -1,0 +1,40 @@
+@using System.Collections.Generic;
+@using System;
+
+@model List<String>
+
+@{
+    ViewData["Title"] = "Groups";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="center container-fluid table-responsive">
+<table class="table table-stripped">
+@foreach (var group in Model) {
+    <tr>
+        <td>@group</td>
+        @*<td><a href="@Url.Action("*@
+        <td>
+            <a 
+                asp-action="DeleteGroup" 
+                method="post" 
+                asp-route-group=@group 
+                class="btn btn-sm btn-danger">
+                delete
+            </a>
+        </td>
+    </tr>
+}
+
+<form asp-action="AddGroup" method="post">
+    <td>
+        <input type="text" name="group"/>
+    </td>
+    <td>
+        <input type="submit" class="btn btn-sm btn-success" value="add"/>
+    </td>
+</form>
+</table>
+</div>
+
+<!-- <p>Use this page to detail your site's privacy policy.</p> -->
