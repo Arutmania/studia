@@ -172,11 +172,11 @@ public:
     }
 
     bool saveJson(QString const& filename) {
-        auto object 	     = QJsonObject {};
+        auto object	         = QJsonObject {};
         object["rooms"]      = QJsonArray::fromStringList(rooms.stringList());
         object["groups"]     = QJsonArray::fromStringList(groups.stringList());
         object["classes"  ]  = QJsonArray::fromStringList(classes.stringList());
-        object["teachers"] 	 = QJsonArray::fromStringList(teachers.stringList());
+        object["teachers"]	 = QJsonArray::fromStringList(teachers.stringList());
         object["activities"] = static_cast<ScheduleModel*>(ui->tableView->model())->activitiesToJson();
 
         auto file = QFile { filename };

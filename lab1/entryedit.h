@@ -27,8 +27,8 @@ class EntryEdit : public QDialog {
 
     auto canSave() const -> bool {
         // all set or none set
-        return (group_->currentIndex() 	 != -1  &&
-                class_->currentIndex() 	 != -1  &&
+        return (group_->currentIndex()	 != -1  &&
+                class_->currentIndex()	 != -1  &&
                 teacher_->currentIndex() != -1) ||
                (group_->currentIndex()   == -1  &&
                 class_->currentIndex()   == -1  &&
@@ -48,8 +48,8 @@ public:
         , groups_(groups)
         , classes_(classes)
         , teachers_(teachers)
-        , group_(new QComboBox { this })
-        , class_(new QComboBox { this })
+        , group_(new QComboBox   { this })
+        , class_(new QComboBox   { this })
         , teacher_(new QComboBox { this })
     {
         group_->setModel(groups_);
@@ -94,14 +94,14 @@ public:
         {
             auto layout = new QHBoxLayout { buttons };
 
-            auto clear 	= new QPushButton { "Clear", buttons };
+            auto clear	= new QPushButton { "Clear", buttons };
             connect(clear, &QPushButton::clicked, this, [this] {
                 group_->setCurrentIndex(-1);
                 class_->setCurrentIndex(-1);
                 teacher_->setCurrentIndex(-1);
             });
 
-            auto save 	= new QPushButton { "Save", buttons };
+            auto save	= new QPushButton { "Save", buttons };
             connect(save, &QPushButton::clicked, this, [this] {
                 if (canSave()) {
                     schedule_->setEntry(group_->currentText(),
