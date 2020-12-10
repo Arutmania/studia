@@ -108,6 +108,8 @@ namespace lab2.Controllers {
                 }
                 public ICollection<String>   Keys   { get => schedule.Keys;   }
                 public ICollection<Schedule> Values { get => schedule.Values; }
+
+                public Boolean Remove(String key) => schedule.Remove(key);
             }
 
             public static SchedDict Schedules = new SchedDict();
@@ -265,6 +267,7 @@ namespace lab2.Controllers {
 
             case "Rooms":
                 State.Rooms.Remove(elem);
+                State.Schedules.Remove(elem);
                 if (State.Room == elem)
                     State.Room = null;
                 return RedirectToAction("ViewList", new { type });
