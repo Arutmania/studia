@@ -21,17 +21,6 @@
     "jsx": "react-jsx"
   },
   "include": [
-    //"./src/**/*.ts",
     "./src"
   ]
 }
-
-
-// strictNullChecks
-// noImplicitThis
-// watch: true???
-
-// scripts: {
-//   build:
-//   test:
-// }
