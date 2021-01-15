@@ -48,6 +48,9 @@ export class State {
 
         state.schedules.forEach((schedule, room) => {
             schedule.forEach((t, i) => t.forEach((s, j) => {
+                const { group, teacher, lecture } = s;
+                if (!group || !teacher || !lecture)
+                    return;
                 json.activities.push({
                     ...s, slot: i, day: j, room
                 });

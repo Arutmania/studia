@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 interface Props {
+    name:   string;
     list:   string[];
     save:   (list: string[]) => void;
     cancel: () => void;
@@ -9,7 +10,7 @@ interface Props {
 export default function ListEdit(props: Props) {
     // unique nonempty sorted
     const filter = (list: string[]) => [...list].sort().filter(
-        (e, i, a) => i === a.length || a[i + 1] !== e && e !== ''
+        (e, i, a) => (i === a.length || a[i + 1] !== e) && e !== ''
     );
 
     let [list,  setList]  = useState(filter(props.list));
@@ -35,6 +36,7 @@ export default function ListEdit(props: Props) {
 
     return (
         <div className="center container table-responsive">
+            <label>{props.name}</label>
             <table className="table table-stripped">
                 {list.map(elem => (
                     <tr>
