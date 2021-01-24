@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 
-//using System.Web.Mvc;
-
 using static lab2.Controllers.HomeController.State;
 
 namespace lab2.Models {

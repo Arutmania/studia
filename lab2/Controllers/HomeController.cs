@@ -17,60 +17,6 @@ namespace lab2.Controllers {
         private readonly ILogger<HomeController> _logger;
 
         public static class State {
-            public class Deserialize {
-                public List<String> groups   { get; set; }
-                public List<String> lectures { get; set; }
-                public List<String> rooms    { get; set; }
-                public List<String> teachers { get; set; }
-                public class Activity {
-                    public Int32  day     { get; set; }
-                    public String group   { get; set; }
-                    public String lecture { get; set; }
-                    public String room    { get; set; }
-                    public Int32  slot    { get; set; }
-                    public String teacher { get; set; }
-                }
-                public List<Activity> activities { get; set; }
-            }
-
-            // static State() {
-            //     try {
-            //         // try deserializing from file - file might not exist
-            //         // or have wrong values - ignore all exceptions
-            //         var deserialize = JsonSerializer.Deserialize<Deserialize>(
-            //             System.IO.File.ReadAllText("test.json")
-            //         );
-
-            //         System.IO.File.WriteAllText("output.json", JsonSerializer.Serialize(deserialize));
-
-            //         // verify values
-            //         if (deserialize.activities.All(
-            //             a => 
-            //                 0 <= a.day && a.day < State.Days.Length    &&
-            //                 deserialize.groups.Contains(a.group)       &&
-            //                 deserialize.lectures.Contains(a.lecture)   &&
-            //                 deserialize.rooms.Contains(a.room)         &&
-            //                 0 <= a.slot && a.slot < State.Times.Length &&
-            //                 deserialize.teachers.Contains(a.teacher)
-            //         )) {
-            //             return;
-            //         }
-
-            //         Groups   = deserialize.groups;
-            //         Lectures = deserialize.lectures;
-            //         Rooms    = deserialize.rooms;
-            //         Teachers = deserialize.teachers;
-
-            //         foreach (var a in deserialize.activities) {
-            //             Schedules[a.room][a.slot, a.day] = new Schedule.Slot {
-            //                 Group   = a.group,
-            //                 Lecture = a.lecture,
-            //                 Teacher = a.teacher,
-            //             };
-            //         }
-            //     } catch { return; }
-            // }
-
             public static List<String> Groups   { get; set; } = new List<String>();
             public static List<String> Lectures { get; set; } = new List<String>();
             public static List<String> Rooms    { get; set; } = new List<String>();
@@ -114,7 +60,6 @@ namespace lab2.Controllers {
 
             public static SchedDict Schedules = new SchedDict();
 
-            // TODO: should these be structs?
             public class Schedule {
                 public class Slot {
                     public String Group   { get; set; } = String.Empty;
@@ -156,7 +101,7 @@ namespace lab2.Controllers {
                             if (pred(schedule[time, day]))
                                 schedule[time, day].Clear();
             }
-            // TODO
+
             public static void RemoveInvalidByGroup() => 
                 RemoveInvalidBy(slot => !Groups.Contains(slot.Group))
             ;
