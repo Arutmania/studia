@@ -78,8 +78,6 @@ public:
         if (role != Qt::DisplayRole)
             return QVariant {};
 
-        // TODO why is this supposedly dangling (if auto const& would have been used)
-        //auto const& slot = schedules[room][index.column()][index.row()];
         auto slot = schedules[room][index.column()][index.row()];
 
         if (slot.isEmpty())
@@ -121,7 +119,8 @@ public:
     }
 
     void removeInvalidClasses(QStringList const& cs) {
-        // here we could try some more elaborate logic to only update the view when necessary and only the parts that changed but why bother
+        // here we could try some more elaborate logic to only update the view
+        // when necessary and only the parts that changed but why bother
         for (auto& schedule : schedules)
             for (auto& day : schedule)
                 for (auto& slot : day)
@@ -173,7 +172,7 @@ public:
         }
 
         // "activities": [
-        //		{ "room": "101", "group": "1a", "class": "mat", "slot": 1, "day": 1, "teacher": "kowalski"},
+        //      { "room": "101", "group": "1a", "class": "mat", "slot": 1, "day": 1, "teacher": "kowalski"},
         // ]
         for (auto a : array) {
             if (!a.isObject()) {
@@ -209,8 +208,8 @@ public:
             auto room_   = activity["room"].toString();
             auto group   = activity["group"].toString();
             auto class_  = activity["class"].toString();
-            auto slot 	 = activity["slot"].toInt();
-            auto day 	 = activity["day"].toInt();
+            auto slot    = activity["slot"].toInt();
+            auto day     = activity["day"].toInt();
             auto teacher = activity["teacher"].toString();
 
             if (!allowedRooms.contains(room_)) {
@@ -250,7 +249,7 @@ public:
 
     auto activitiesToJson() const -> QJsonArray {
         // "activities": [
-        //		{ "room": "101", "group": "1a", "class": "mat", "slot": 1, "day": 1, "teacher": "kowalski"},
+        //      { "room": "101", "group": "1a", "class": "mat", "slot": 1, "day": 1, "teacher": "kowalski"},
         // ]
         auto activities = QJsonArray {};
         for (auto it = schedules.begin(); it != schedules.end(); it++)
@@ -259,11 +258,11 @@ public:
                     auto const& schedule = *it;
                     if (auto const& entry = schedule[day][slot]; !entry.isEmpty()) {
                         auto activity = QJsonObject {};
-                        activity["room"] 	= it.key();
-                        activity["group"] 	= entry.group_;
-                        activity["class"] 	= entry.class_;
-                        activity["slot"]  	= slot;
-                        activity["day"]   	= day;
+                        activity["room"]    = it.key();
+                        activity["group"]   = entry.group_;
+                        activity["class"]   = entry.class_;
+                        activity["slot"]    = slot;
+                        activity["day"]     = day;
                         activity["teacher"] = entry.teacher_;
                         activities.push_back(activity);
                     }

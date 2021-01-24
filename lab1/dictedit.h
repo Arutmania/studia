@@ -21,9 +21,9 @@ public:
         : QDialog(parent)
         , view(new QListView { this })
         , originalModel(model)
-        , add(new QPushButton { "&Add" , this })
+        , add(new QPushButton { "&Add" ,   this })
         , del(new QPushButton { "&Delete", this })
-        , sav(new QPushButton { "&Save", this })
+        , sav(new QPushButton { "&Save",   this })
     {
         view->setModel(new QStringListModel { originalModel->stringList(), this });
 
@@ -57,8 +57,6 @@ public:
         connect(sav, &QPushButton::clicked, this, [this] {
            auto model = static_cast<QStringListModel*>(view->model());
            // ghetto remove duplicates
-           // WHY THE FUCK WOULD THIS SEGFAULT???
-           //auto set = QSet<QString> { model->stringList().begin(), model->stringList().end() };
            auto list = model->stringList();
            auto set = QSet<QString> { list.begin(), list.end() };
            list = QStringList { set.begin(), set.end() };

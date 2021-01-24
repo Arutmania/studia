@@ -102,11 +102,19 @@ public:
 
         connect(ui->tableView, &QTableView::doubleClicked, this, [this] (auto const& index){
             if (ui->comboBox->currentIndex() != -1) {
-                auto w = new EntryEdit { static_cast<ScheduleModel*>(ui->tableView->model()), index, &groups, &classes, &teachers, this };
+                auto w = new EntryEdit {
+                    static_cast<ScheduleModel*>(ui->tableView->model()),
+                        index,
+                        &groups,
+                        &classes,
+                        &teachers,
+                        this
+                };
                 w->show();
             } else {
                 // this seems to give error when closed with mouse and apparently is a well known bug?
-                // qt.qpa.xcb: QXcbConnection: XCB error: 3 (BadWindow), sequence: 1397, resource id: 8884191, major code: 40 (TranslateCoords), minor code: 0
+                //  qt.qpa.xcb: QXcbConnection: XCB error: 3 (BadWindow),
+                //  sequence: 1397, resource id: 8884191, major code: 40 (TranslateCoords), minor code: 0
                 // welp, not my fault. everything werks tho
                 QMessageBox::warning(this, "planner", "no room selected");
             }
@@ -172,11 +180,11 @@ public:
     }
 
     bool saveJson(QString const& filename) {
-        auto object	         = QJsonObject {};
+        auto object          = QJsonObject {};
         object["rooms"]      = QJsonArray::fromStringList(rooms.stringList());
         object["groups"]     = QJsonArray::fromStringList(groups.stringList());
         object["classes"  ]  = QJsonArray::fromStringList(classes.stringList());
-        object["teachers"]	 = QJsonArray::fromStringList(teachers.stringList());
+        object["teachers"]   = QJsonArray::fromStringList(teachers.stringList());
         object["activities"] = static_cast<ScheduleModel*>(ui->tableView->model())->activitiesToJson();
 
         auto file = QFile { filename };
