@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { Slot } from './data'
 
-// TODO:
-// ładniejszy layout
-
 interface Props {
     room:     string;
     value?:   Slot;
@@ -46,6 +43,7 @@ export default function SlotEdit(props: Props) {
 
     return (
         <form className="center container container-fluid form-horizontal">
+            <label>{props.room}</label>
             <div className="form-group">
                 <label className="control-label col-sm-2" htmlFor="group">group</label>
                 <Select id="group" value={group} list={props.groups} onChange={handle(setGroup)} />
