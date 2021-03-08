@@ -1,10 +1,14 @@
 import numpy as np
 import time
+import argparse
+import sys
 
 # BIG ENTERPRISE DESIGN PATTERNS BENEATH
 
+
 class Loss:
-    '''quadratic vector form'''
+    """quadratic vector form"""
+
     def __init__(self, A, b, c):
         self.A, self.b, self.c = A, b, c
 
@@ -17,32 +21,49 @@ class Loss:
     def hessian(self, x):
         return self.A.T + self.A
 
-'''learning rate'''
+
+"""learning rate"""
 RATE = 0.1
 
 # a method is a callable taking loss function and current x, returning next x
 def simple_gradient_descent_method(loss, x):
     return x - RATE * loss.gradient(x)
 
+
 def newtons_method(loss, x):
     return x - RATE * np.linalg.inv(loss.hessian(x)) @ loss.gradient(x)
 
+
 # a condition is a callable taking algorithm and returning whether it should continue
 class IterationCondition:
-    '''terminate algorithm after `max` iterations'''
+    """terminate algorithm after `max` iterations"""
+
     def __init__(self, max):
-        self.max = max
+        self.max = int(max)
 
     def __call__(self, context):
         return self.max < context.iteration
 
+
 class TimeCondition:
-    '''terminate algorithm after `max` process nanoseconds'''
+    """terminate algorithm after `max` process nanoseconds"""
+
     def __init__(self, max):
-        self.max = max
+        self.max = int(max)
 
     def __call__(self, context):
         return self.max < time.process_time_ns() - context.starttime
+
+    @staticmethod
+    def parse(input):
+        if input.endswith("ns"):
+            return TimeCondition.microseconds(input[:-2])
+        elif input.endswith("ms"):
+            return TimeCondition.miliseconds(input[:-2])
+        elif input.endswith("s"):
+            return TimeCondition.seconds(input[:-1])
+        else:
+            return TimeCondition(input)
 
     @staticmethod
     def seconds(max):
@@ -56,25 +77,28 @@ class TimeCondition:
     def microseconds(max):
         return TimeCondition(max * 1000)
 
+
 class ValueCondition:
-    '''terminate algorithm after `value` with desired `eps` precision is reached'''
+    """terminate algorithm after `value` with desired `eps` precision is reached"""
+
     def __init__(self, value, eps=np.finfo(float).eps):
-        self.value, self.eps = value, eps
+        self.value, self.eps = float(value), eps
 
     def __call__(self, context):
         return np.abs(context.loss(context.x) - self.value) > 1.5 * self.eps
 
+
 class Algorithm:
     def __init__(self, loss, x0, method, condition):
-        self.loss      = loss
-        self.x0        = x0
-        self.method    = method
+        self.loss = loss
+        self.x0 = x0
+        self.method = method
         self.condition = condition
 
     def run(self):
         self.iteration = 0
-        self.x         = self.x0
-        self.startime  = time.process_time_ns()
+        self.x = self.x0
+        self.starttime = time.process_time_ns()
 
         while self.condition(self):
             self.x = self.method(self.loss, self.x)
@@ -82,5 +106,150 @@ class Algorithm:
 
         return self.x, self.loss(self.x)
 
-if __name__ == '__main__':
-    pass
+
+def parse_matrix(input):
+    """
+    input to parse array should be a string consisting of real numbers with
+    elements in a matrix row separated by commas and rows separated
+    by semicolons as:
+        '1, 2, 3; 4, 5, 6; 7, 8, 9'
+    it returns a numpy.ndarray
+    """
+    # remove whitespace
+    input = "".join(input.split())
+
+    # split rows by ';' and row elements by ','
+    matrix = np.array([[float(e) for e in r.split(",")] for r in input.split(";")])
+
+    # TODO: check for row matrix?
+    # if a column matrix flatten to a vector
+    if 1 in matrix.shape:
+        return matrix.flatten()
+    return matrix
+
+# https://stackoverflow.com/a/34110323
+def is_positive_definite(A):
+    M = np.array(A)
+    return np.all(np.linalg.eigvals(M + M.T) > 0)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    # coefficients
+    parser.add_argument(
+        "-A",
+        type=parse_matrix,
+        required=True,
+        help="2nd order coefficient (NxN matrix)",
+    )
+    parser.add_argument(
+        "-b",
+        type=parse_matrix,
+        required=True,
+        help="1st order coefficient (N-dimensional vector)",
+        metavar="b",
+    )
+    parser.add_argument(
+        "-c",
+        type=float,
+        required=True,
+        help="0th order coefficient (scalar)",
+        metavar="c",
+    )
+
+    # method
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--gradient",
+        action="store_const",
+        const=simple_gradient_descent_method,
+        help="use simple gradient descent method to minimize function",
+        dest="method",
+    )
+    group.add_argument(
+        "--newton",
+        action="store_const",
+        const=newtons_method,
+        help="use newton's method to minimize function",
+        dest="method",
+    )
+
+    # starting point
+    # TODO: handle this somehow
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-x0", type=parse_matrix, help="starting value for x", metavar="x0"
+    )
+    group.add_argument(
+        "--uniform",
+        type=float,
+        nargs=2,
+        help="initialize x0 from uniform distribution [l, u]",
+        metavar=("l", "u"),
+    )
+
+    # condition
+    # TODO: precision for value condition
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--iterate",
+        type=IterationCondition,
+        help="number N of iterations the algorithm runs",
+        metavar="N",
+        dest="condition",
+    )
+    group.add_argument(
+        "--time",
+        type=TimeCondition.parse,
+        help="""
+        amount of nanoseconds N the algorithm runs (process time) 
+        additionally you can use 's', 'ms' or 'ns' suffix to specify 
+        seconds, miliseconds or nanoseconds
+        """,
+        metavar="N",
+        dest="condition",
+    )
+    group.add_argument(
+        "--value",
+        type=ValueCondition,
+        help="algorithm is run until desired value N is reached",
+        metavar="N",
+        dest="condition",
+    )
+
+    # batch mode
+    parser.add_argument(
+        "--batch", type=int, help="restart optimization N times", metavar="N"
+    )
+
+    args = parser.parse_args()
+
+    # verify sizes
+    # if uniform create uniform vector of specified size
+    try:
+        if args.A.shape[0] != args.A.shape[1]:
+            raise ValueError("A should be a square NxN matrix")
+        if not is_positive_definite(args.A):
+            raise ValueError("A should be a positive-definite matrix")
+        A = args.A
+        n = A.shape[0]
+        if args.b.ndim != 1 or args.b.shape[0] != n:
+            raise ValueError("b should be N-dimensional vector")
+        b = args.b
+        if args.x0 is not None:
+            x0 = args.x0
+        else:
+            x0 = np.random.uniform(args.uniform[0], args.uniform[1], n)
+        if x0.ndim != 1 or x0.shape[0] != n:
+            raise ValueError("x0 should be a N-dimensional vector")
+    except ValueError as e:
+        sys.exit(e)
+
+    x, y = Algorithm(Loss(A, b, args.c), x0, args.method, args.condition).run()
+
+    print(args.A, args.b, args.c, args.method, args.uniform)
+    print(x, y)
+
+
+'4.45867771, 1.45867771, 1.45867771; 1.45867771, 4.45867771, 1.45867771; 1.45867771, 1.45867771, 4.45867771'
