@@ -42,7 +42,7 @@ class IterationCondition:
         self.max = int(max)
 
     def __call__(self, context):
-        return self.max < context.iteration
+        return self.max > context.iteration
 
 
 class TimeCondition:
@@ -52,7 +52,7 @@ class TimeCondition:
         self.max = int(max)
 
     def __call__(self, context):
-        return self.max < time.process_time_ns() - context.starttime
+        return self.max > time.perf_counter_ns() - context.starttime
 
     @staticmethod
     def parse(input):
@@ -67,15 +67,15 @@ class TimeCondition:
 
     @staticmethod
     def seconds(max):
-        return TimeCondition.miliseconds(max * 1000)
+        return TimeCondition.miliseconds(int(max) * 1000)
 
     @staticmethod
     def miliseconds(max):
-        return TimeCondition.microseconds(max * 1000)
+        return TimeCondition.microseconds(int(max) * 1000)
 
     @staticmethod
     def microseconds(max):
-        return TimeCondition(max * 1000)
+        return TimeCondition(int(max) * 1000)
 
 
 class ValueCondition:
@@ -98,7 +98,7 @@ class Algorithm:
     def run(self):
         self.iteration = 0
         self.x = self.x0
-        self.starttime = time.process_time_ns()
+        self.starttime = time.perf_counter_ns()
 
         while self.condition(self):
             self.x = self.method(self.loss, self.x)
@@ -126,7 +126,6 @@ def parse_matrix(input):
     if 1 in matrix.shape:
         return matrix.flatten()
     return matrix
-
 
 # https://stackoverflow.com/a/34110323
 def is_positive_definite(A):
