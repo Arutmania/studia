@@ -121,7 +121,6 @@ def parse_matrix(input):
     # split rows by ';' and row elements by ','
     matrix = np.array([[float(e) for e in r.split(",")] for r in input.split(";")])
 
-    # TODO: check for row matrix?
     # if a column matrix flatten to a vector
     if 1 in matrix.shape:
         return matrix.flatten()
@@ -177,7 +176,6 @@ def setup_parser():
     )
 
     # starting point
-    # TODO: handle this somehow
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "-x0", type=parse_matrix, help="starting value for x", metavar="x0"
@@ -191,7 +189,6 @@ def setup_parser():
     )
 
     # condition
-    # TODO: precision for value condition
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "--iterate",
@@ -258,6 +255,16 @@ if __name__ == "__main__":
     parser = setup_parser()
     A, b, c, x0, method, condition, batch = parse_args(parser)
 
-    # TODO: batch mode
-    x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
-    print(x, y)
+    if batch is None:
+        x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
+        print(f"found solution is {x} and function value is {y}")
+    else:
+        solutions, values = [], []
+        for _ in range(batch):
+            x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
+            solutions.append(x)
+            values.append(y)
+        print("mean of found solutions:", np.mean(solutions))
+        print("mean of function values:", np.mean(values))
+        print("standard deviation of found solutions:", np.std(solutions))
+        print("standard deviation of function values:", np.std(values))
