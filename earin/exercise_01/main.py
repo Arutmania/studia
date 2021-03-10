@@ -127,13 +127,14 @@ def parse_matrix(input):
         return matrix.flatten()
     return matrix
 
+
 # https://stackoverflow.com/a/34110323
 def is_positive_definite(A):
     M = np.array(A)
     return np.all(np.linalg.eigvals(M + M.T) > 0)
 
 
-if __name__ == "__main__":
+def setup_parser():
     parser = argparse.ArgumentParser()
 
     # coefficients
@@ -223,6 +224,10 @@ if __name__ == "__main__":
         "--batch", type=int, help="restart optimization N times", metavar="N"
     )
 
+    return parser
+
+
+def parse_args(parser):
     args = parser.parse_args()
 
     # verify sizes
@@ -246,6 +251,13 @@ if __name__ == "__main__":
     except ValueError as e:
         sys.exit(e)
 
+    return A, b, args.c, x0, args.method, args.condition, args.batch
+
+
+if __name__ == "__main__":
+    parser = setup_parser()
+    A, b, c, x0, method, condition, batch = parse_args(parser)
+
     # TODO: batch mode
-    x, y = Algorithm(Loss(A, b, args.c), x0, args.method, args.condition).run()
+    x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
     print(x, y)
