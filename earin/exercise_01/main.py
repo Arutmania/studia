@@ -155,13 +155,13 @@ def setup_parser():
         "-A",
         type=parse_matrix,
         required=True,
-        help="2nd order coefficient (NxN matrix)",
+        help="2nd order coefficient (NxN matrix) - ex '1, 0; 1, 0'",
     )
     parser.add_argument(
         "-b",
         type=parse_matrix,
         required=True,
-        help="1st order coefficient (N-dimensional vector)",
+        help="1st order coefficient (N-dimensional vector) - ex '0; 0' or '0, 0'",
         metavar="b",
     )
     parser.add_argument(
@@ -233,10 +233,11 @@ def setup_parser():
         "--any",
         type=AnyCondition,
         help="""
-         algorithm is run until any of return condition (iteration, time or value) is reached
+        algorithm is run until any of return condition (iteration, time or value) is reached
         number N1 of iterations the algorithm runs
         amount of nanoseconds N2 the algorithm runs (process time)
         algorithm is run until desired value N3 is reached
+        the values for conditions need to be given in a single argument separated by spaces: '10 5s 0'
         """,
         metavar=("N1", "N2", "N3"),
         dest="condition",
