@@ -88,6 +88,20 @@ class ValueCondition:
         return np.abs(context.loss(context.x) - self.value) > 1.5 * self.eps
 
 
+class AnyCondition:
+    """terminate algorithm after any of the conditions is met"""
+
+    def __init__(self, conditions):
+        conditions = conditions.split()
+        iteration = IterationCondition(conditions[0])
+        time = TimeCondition.parse(conditions[1])
+        value = ValueCondition(conditions[2])
+        self.conditions = [iteration, time, value]
+
+    def __call__(self, context):
+        return all([condition(context) for condition in self.conditions])
+
+
 class Algorithm:
     def __init__(self, loss, x0, method, condition):
         self.loss = loss
@@ -213,6 +227,18 @@ def setup_parser():
         type=ValueCondition,
         help="algorithm is run until desired value N is reached",
         metavar="N",
+        dest="condition",
+    )
+    group.add_argument(
+        "--any",
+        type=AnyCondition,
+        help="""
+         algorithm is run until any of return condition (iteration, time or value) is reached
+        number N1 of iterations the algorithm runs
+        amount of nanoseconds N2 the algorithm runs (process time)
+        algorithm is run until desired value N3 is reached
+        """,
+        metavar=("N1", "N2", "N3"),
         dest="condition",
     )
 
