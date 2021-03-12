@@ -233,13 +233,16 @@ def setup_parser():
         "--any",
         type=AnyCondition,
         help="""
-        algorithm is run until any of return condition (iteration, time or value) is reached
-        number N1 of iterations the algorithm runs
-        amount of nanoseconds N2 the algorithm runs (process time)
-        algorithm is run until desired value N3 is reached
-        the values for conditions need to be given in a single argument separated by spaces: '10 5s 0'
+        algorithm is run until any of return condition 
+        (iteration, time or value) is reached:
+        number N1 of iterations, the algorithm runs N2
+        amount of time (as in --time),
+        algorithm is run until desired value N3 is reached (is within machine
+        epsilon * 1.5).
+        the values for conditions need to be given in a single argument 
+        separated by spaces: '10 5s 0'
         """,
-        metavar=("N1", "N2", "N3"),
+        metavar="N1 N2 N3",
         dest="condition",
     )
 
