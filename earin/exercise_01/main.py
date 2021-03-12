@@ -240,11 +240,11 @@ def parse_args(parser):
             raise ValueError("b should be N-dimensional vector")
         b = args.b
         if args.x0 is not None:
-            x0 = args.x0
+            if x0.ndim != 1 or x0.shape[0] != n:
+                raise ValueError("x0 should be a N-dimensional vector")
+            x0 = lambda: args.x0
         else:
-            x0 = np.random.uniform(args.uniform[0], args.uniform[1], n)
-        if x0.ndim != 1 or x0.shape[0] != n:
-            raise ValueError("x0 should be a N-dimensional vector")
+            x0 = lambda: np.random.uniform(args.uniform[0], args.uniform[1], n)
     except ValueError as e:
         sys.exit(e)
 
@@ -256,12 +256,12 @@ if __name__ == "__main__":
     A, b, c, x0, method, condition, batch = parse_args(parser)
 
     if batch is None:
-        x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
+        x, y = Algorithm(Loss(A, b, c), x0(), method, condition).run()
         print(f"found solution is {x} and function value is {y}")
     else:
         solutions, values = [], []
         for _ in range(batch):
-            x, y = Algorithm(Loss(A, b, c), x0, method, condition).run()
+            x, y = Algorithm(Loss(A, b, c), x0(), method, condition).run()
             solutions.append(x)
             values.append(y)
         print("mean of found solutions:", np.mean(solutions))
