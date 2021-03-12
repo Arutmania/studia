@@ -56,7 +56,7 @@ class TimeCondition:
 
     @staticmethod
     def parse(input):
-        if input.endswith("ns"):
+        if input.endswith("us"):
             return TimeCondition.microseconds(input[:-2])
         elif input.endswith("ms"):
             return TimeCondition.miliseconds(input[:-2])
@@ -216,8 +216,8 @@ def setup_parser():
         type=TimeCondition.parse,
         help="""
         amount of nanoseconds N the algorithm runs (process time) 
-        additionally you can use 's', 'ms' or 'ns' suffix to specify 
-        seconds, miliseconds or nanoseconds
+        additionally you can use 's', 'ms' or 'us' suffix to specify
+        seconds, miliseconds or microseconds
         """,
         metavar="N",
         dest="condition",
