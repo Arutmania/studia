@@ -272,7 +272,7 @@ def parse_args(parser):
     # if x0 not present seed from uniform distribution
     if args.x0 is not None:
         # verify dimension
-        if x0.ndim != 1 or x0.shape[0] != n:
+        if args.x0.ndim != 1 or args.x0.shape[0] != n:
             parser.error("x0 should be a N-dimensional vector")
         x0 = lambda: args.x0
     else:
