@@ -259,31 +259,30 @@ def parse_args(parser):
 
     # verify sizes
     # if uniform create uniform vector of specified size
-    try:
-        if args.A.shape[0] != args.A.shape[1]:
-            raise ValueError("A should be a square NxN matrix")
-        if not is_positive_definite(args.A):
-            raise ValueError("A should be a positive-definite matrix")
-        A = args.A
-        n = A.shape[0]
-        if args.b.ndim != 1 or args.b.shape[0] != n:
-            raise ValueError("b should be N-dimensional vector")
-        b = args.b
-        if args.x0 is not None:
-            if x0.ndim != 1 or x0.shape[0] != n:
-                raise ValueError("x0 should be a N-dimensional vector")
-            x0 = lambda: args.x0
-        else:
-            x0 = lambda: np.random.uniform(args.uniform[0], args.uniform[1], n)
-    except ValueError as e:
-        sys.exit(e)
+    if args.A.shape[0] != args.A.shape[1]:
+        parser.error("A should be a square NxN matrix")
 
-    return A, b, args.c, x0, args.method, args.condition, args.batch
+    if not is_positive_definite(args.A):
+        parser.error("A should be a positive-definite matrix")
+
+    n = args.A.shape[0]
+    if args.b.ndim != 1 or args.b.shape[0] != n:
+        parser.error("b should be N-dimensional vector")
+
+    # if x0 not present seed from uniform distribution
+    if args.x0 is not None:
+        # verify dimension
+        if x0.ndim != 1 or x0.shape[0] != n:
+            parser.error("x0 should be a N-dimensional vector")
+        x0 = lambda: args.x0
+    else:
+        x0 = lambda: np.random.uniform(args.uniform[0], args.uniform[1], n)
+
+    return args.A, args.b, args.c, x0, args.method, args.condition, args.batch
 
 
 if __name__ == "__main__":
-    parser = setup_parser()
-    A, b, c, x0, method, condition, batch = parse_args(parser)
+    A, b, c, x0, method, condition, batch = parse_args(setup_parser())
 
     if batch is None:
         x, y = Algorithm(Loss(A, b, c), x0(), method, condition).run()
