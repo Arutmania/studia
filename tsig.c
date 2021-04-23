@@ -120,7 +120,7 @@
 #   define NUM_CHILD 10
 #endif
 
-//#define WITH_SIGNALS
+#define WITH_SIGNALS
 
 #ifdef WITH_SIGNALS
 static bool mark = false;
@@ -135,7 +135,6 @@ static void terminate(int sig) {
     (void) sig;
     // set only in child processes
     printf("child[%d]: received SIGTERM signal, terminating\n", getpid());
-    // TODO: terminate???
 }
 #endif
 
@@ -145,7 +144,6 @@ static int created = 0;
 static void handle_fail(void) {
     fputs("failed to create a child - exiting", stderr);
     while (created--)
-        // maybe do by process groups - kill(0, SIGTERM); ?
         kill(children[created], SIGTERM);
     exit(1);
 }
@@ -165,8 +163,6 @@ int main(void) {
 #ifdef WITH_SIGNALS
     // source: https://stackoverflow.com/a/29434215
     // SIGKILL and SIGSTOP cannot be caught or ignored, 32 and 33 do not exists
-    // TODO:
-    //  see SIGTRMAX
     struct sigaction old[65];
     for (int i = 1; i < 65; ++i )
         if (i != SIGKILL && i != SIGSTOP && i != 32 && i != 33)
@@ -207,15 +203,14 @@ int main(void) {
 #endif
 
 
-    // should wait for created and then check if any more pending?
     int terminated = 0, status;
     while (wait(&status) > 0)
-        printf("parent[%d]: child no %d terminated with exit code %d\n",
-               getpid(), ++terminated, WEXITSTATUS(status));
+        if (WIFEXITED(status))
+            printf("parent[%d]: child no %d terminated with exit code %d\n",
+                   getpid(), ++terminated, WEXITSTATUS(status));
 
 
     printf("parent[%d]: there are no more child processes\n", getpid());
-    // should i print exit codes of respective child processes?
     printf("parent[%d]: %d child processes terminated\n", getpid(), terminated);
 
 #ifdef WITH_SIGNALS
