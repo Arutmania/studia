@@ -62,7 +62,7 @@ class Board:
 
         # if self.winner() is WHITE:
         #     return +999
-        # else:
+        # elif self.winner() is BLACK:
         #     return -999
 
         white_score = self.white_left + self.white_kings * 4
