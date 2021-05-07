@@ -1,0 +1,36 @@
+{
+    "nodes": ["bulglary", "earthquake", "alarm", "john", "marry"],
+    "relations": {
+        "bulglary": {
+            "parents": [],
+            "probabilities": { "T": 0.01, "F": 0.99 }
+        },
+        "earthquake": {
+            "parents": [],
+            "probabilities": { "T": 0.02, "F": 0.98 }
+        },
+        "alarm": {
+            "parents": ["bulglary", "earthquake"],
+            "probabilities": {
+                "T,T,T": 0.950, "T,T,F": 0.050,
+                "T,F,T": 0.940, "T,F,F": 0.060,
+                "F,T,T": 0.290, "F,T,F": 0.710,
+                "F,F,T": 0.001, "F,F,F": 0.999
+            }
+        },
+        "john": {
+            "parents": ["alarm"],
+            "probabilities": {
+                "T,T": 0.90, "T,F": 0.10,
+                "F,T": 0.05, "F,F": 0.95
+            }
+        },
+        "marry": {
+            "parents": ["alarm"],
+            "probabilities": {
+                "T,T": 0.70, "T,F": 0.30,
+                "F,T": 0.01, "F,F": 0.99
+            }
+        }
+    }
+}
