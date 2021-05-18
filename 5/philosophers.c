@@ -25,23 +25,11 @@ static int FORKS[] = {
 };
 
 #define LEN(x) (sizeof(x) / sizeof(x[0]))
-
-#define LEFT_OF (p) ((p + LEN(PHILOSOPHERS) - 1) % LEN(PHILOSOPHERS))
-#define RIGHT_OF(p) ((p + 1)                     % LEN(PHILOSOPHERS))
-
-enum state {
-    THINKING,
-    HUNGRY,
-    EATING,
-};
+#ifndef MEALS
+#   define MEALS 5
+#endif
 
 static int SEMID;
-
-//union semun {
-//    int              val;
-//    struct semid_ds* buf;
-//    unsigned short*  array;
-//};
 
 static inline void grab_forks(int const left) {
     int const right = left + 1 % LEN(PHILOSOPHERS);
@@ -78,6 +66,7 @@ static inline void grab_forks(int const left) {
 
 static inline void put_away_forks(int const left) {
     int const right = left + 1 % LEN(PHILOSOPHERS);
+
     printf("%s is putting away forks: %d and %d\n",
            PHILOSOPHERS[left], left, right);
     semop(
@@ -101,7 +90,7 @@ void eat(int philosopher, int meal) {
 }
 
 void* philosopher(void* id) {
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < MEALS; ++i) {
         think(*(int*)id);
         grab_forks(*(int*)id);
         eat(*(int*)id, i + 1);
@@ -111,28 +100,29 @@ void* philosopher(void* id) {
 }
 
 int main(void) {
+    /* create LEN(PHILOSOPHERS) semaphores with rights 0666 */
     SEMID = semget(IPC_PRIVATE, LEN(PHILOSOPHERS), 0666);
 
+    /* check if created successfully */
     if (SEMID < 0)
         err(EXIT_FAILURE, "failed to create semaphores");
 
 
+    /* initialize all semaphores to 1 - all forks are free initially */
     for (int i = 0; i < (int)LEN(PHILOSOPHERS); ++i)
         if (semctl(SEMID, i, SETVAL, 1) < 0)
             err(EXIT_FAILURE, "failed to initialize semaphore %d", i);
 
-
-    for (int i = 0; i < (int)LEN(PHILOSOPHERS); ++i)
-        if (semctl(SEMID, i, SETVAL, 1) < 0)
-            err(EXIT_FAILURE, "failed to initialize semaphore %d", i);
-
+    /* create LEN(PHILOSOPHERS) threads and run philosopher on them */
     pthread_t threads[LEN(PHILOSOPHERS)];
     for (int i = 0; i < (int)LEN(threads); ++i)
         pthread_create(&threads[i], NULL, philosopher, &FORKS[i]);
 
+    /* join created threads */
     for (int i = 0; i < (int)LEN(threads); ++i)
         pthread_join(threads[i], NULL);
 
+    /* remove the allocated semaphores */
     if (semctl(SEMID, LEN(PHILOSOPHERS), IPC_RMID) < 0)
         err(EXIT_FAILURE, "failed to deallocate semaphores");
 }
