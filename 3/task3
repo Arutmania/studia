@@ -1,8 +1,0 @@
-2 processes:
-    in case of 2 processes both processes have more than enough time to block 3 times and complete.
-
-5 processes:
-    in case of 5 processes all processes 0 through 4 show in the 'Summary-Results' that they completed 3 times, however 'Summary-Processes' doesn't show message for process 4 completion (just enough time to run, not enough to message completion?).
-
-10 processes:
-    there is not enough time for all 10 processes to be run not to mention complete 3 times. 'Summary-Results' shows that processes 0-3 completed (blocked?) full 3 times. process 4 completed (blocked) 2 times and process 5 1 times. this is caused by the fact that processes run in turns - after 0 blocks 1 runs, then when 1 blocks 0 runs, and after last block of 1 2 runs because 0 already completed in full. thats why after 3 completed full run time and 4 blocked process 5 was run.
