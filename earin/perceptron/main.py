@@ -35,7 +35,8 @@ def f(x):
 
 
 if __name__ == "__main__":
-    net = Net()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    net = Net().to(device)
     # the optimizer - Adam is type of SDG
     optim = torch.optim.Adam(net.parameters(), lr=LEARNING_RATE)
     # mean square error loss function
@@ -49,7 +50,7 @@ if __name__ == "__main__":
 
     for epoch in range(1, EPOCHS + 1):
         for batch, expected in dataloader:
-            loss = criterion(net(batch), expected)
+            loss = criterion(net(batch.to(device)), expected.to(device))
             optim.zero_grad()
             loss.backward()
             optim.step()
@@ -57,15 +58,14 @@ if __name__ == "__main__":
         if epoch % 100 == 0:
             print(f"epoch #{epoch}: {loss.item()}")
 
-    predict = net(X)
+    predict = net(X.to(device))
 
     # Plot showing the difference between predicted and real data
-    x, y = X.detach().numpy(), Y.detach().numpy()
+    x, y = X.detach().cpu().numpy(), Y.detach().cpu().numpy()
     plt.plot(x, y, label="factual")
     plt.plot(x, predict.detach().numpy(), label="predicted")
     plt.title("function")
     plt.xlabel("x")
     plt.ylabel("f(x)")
     plt.legend()
-    plt.savefig(fname="result.png", figsize=[10, 10])
-    plt.show()
+    plt.savefig(fname="result.png")
