@@ -46,7 +46,9 @@ if __name__ == "__main__":
     X = torch.from_numpy(np.linspace(-10, 10, 1000)).float().unsqueeze(1)
     Y = f(X)
 
-    dataloader = DataLoader(TensorDataset(X, Y), batch_size=100, shuffle=True)
+    dataloader = DataLoader(
+        TensorDataset(X, Y), batch_size=BATCH_SIZE, shuffle=True, pin_memory=True
+    )
 
     for epoch in range(1, EPOCHS + 1):
         for batch, expected in dataloader:
