@@ -12,11 +12,8 @@ class Net(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(1, 1024),
-            nn.ReLU(),
-            # nn.Linear(10, 100),
-            # nn.ReLU(),
-            # nn.Linear(100, 10),
-            # nn.ReLU(),
+            nn.ReLU(inplace=True),
+            nn.Tanh(),
             nn.Linear(1024, 1),
         )
 
