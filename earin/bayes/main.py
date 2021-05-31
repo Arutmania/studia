@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 import json
 import copy
 import random
@@ -70,7 +72,12 @@ class Node:
                 # equal to about 1
                 abs(
                     # sum of probabilities for that parent outcome
-                    sum([self.probs[outcome + (value,)] for value in self.possible_values])
+                    sum(
+                        [
+                            self.probs[outcome + (value,)]
+                            for value in self.possible_values
+                        ]
+                    )
                     - 1
                 )
                 < float_info.epsilon * 1.5
@@ -88,7 +95,7 @@ class Net:
 
         if not self.is_acyclic():
             raise ValueError("Bayesian Net should be acyclic")
-        
+
         if not all([node.probabilities_valid() for node in self.nodes.values()]):
             raise ValueError("Invalid probabilities")
 
@@ -173,7 +180,15 @@ class Net:
                 """weitght with which this value should be choosen"""
                 return node.probs[outcome(node, value)] * prod(
                     [
-                        child.probs[outcome(child, child.value)]
+                        child.probs[
+                            tuple(
+                                [
+                                    p.value if p is not node else value
+                                    for p in child.parents
+                                ]
+                                + [child.value]
+                            )
+                        ]
                         for child in node.children
                     ]
                 )
@@ -262,7 +277,7 @@ def setup_parser():
         help="""
         show markov blanket for variable, all other arguments are
         unfortunately required but ignored
-        """
+        """,
     )
 
     return parser
@@ -270,7 +285,7 @@ def setup_parser():
 
 def parse_args(parser):
     args = parser.parse_args()
-    
+
     it = iter(args.evidence)
     evidence = {variable: next(it) for variable in it}
 
