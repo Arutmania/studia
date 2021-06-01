@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <err.h>
+#include <pthread.h>
+#include <signal.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
-
-#include <err.h>
-
-#include <pthread.h>
-
+#include <sys/wait.h>
 #include <unistd.h>
 
 static char const* const PHILOSOPHERS[] = {
@@ -20,16 +19,23 @@ static char const* const PHILOSOPHERS[] = {
     "Descartes",
 };
 
-static int FORKS[] = {
-    0, 1, 2, 3, 4,
-};
-
 #define LEN(x) (sizeof(x) / sizeof(x[0]))
 #ifndef MEALS
 #   define MEALS 5
 #endif
 
 static int SEMID;
+static pid_t children[LEN(PHILOSOPHERS)];
+static int created = 0;
+
+/* terminate created processes and exit upon process creation failure */
+static inline void handle_fail(void) {
+    fputs("failed to create a child - exiting", stderr);
+    for (; created > 0; --created)
+        kill(children[created], SIGTERM);
+    exit(EXIT_FAILURE);
+}
+
 
 static inline void grab_forks(int const left) {
     int const right = left + 1 % LEN(PHILOSOPHERS);
@@ -38,27 +44,19 @@ static inline void grab_forks(int const left) {
            PHILOSOPHERS[left], left, right);
 
     /*
-     * in order to avoid deadlock even philosophers pick right fork first,
-     * while odd start with left fork
+     * decrease left and right fork semaphores
+     *
+     * because either both semaphores are changed
+     * or none there is risk of deadlocks
      */
-    if (left & 1)
-        semop(
-            SEMID,
-            (struct sembuf[]) {
-                { .sem_num = left,  .sem_op = -1, .sem_flg = 0 },
-                { .sem_num = right, .sem_op = -1, .sem_flg = 0 },
-            },
-            2
-        );
-    else
-        semop(
-            SEMID,
-            (struct sembuf[]) {
-                { .sem_num = right, .sem_op = -1, .sem_flg = 0 },
-                { .sem_num = left,  .sem_op = -1, .sem_flg = 0 },
-            },
-            2
-        );
+    semop(
+        SEMID,
+        (struct sembuf[]) {
+            { .sem_num = left,  .sem_op = -1, .sem_flg = 0 },
+            { .sem_num = right, .sem_op = -1, .sem_flg = 0 },
+        },
+        2
+    );
 
     printf("%s grabbed forks: %d, %d\n",
            PHILOSOPHERS[left], left, right);
@@ -69,6 +67,10 @@ static inline void put_away_forks(int const left) {
 
     printf("%s is putting away forks: %d and %d\n",
            PHILOSOPHERS[left], left, right);
+
+    /*
+     * put away forks by increasing left and right fork semaphores
+     */
     semop(
         SEMID,
         (struct sembuf[2]) {
@@ -89,14 +91,14 @@ void eat(int philosopher, int meal) {
     sleep(1);
 }
 
-void* philosopher(void* id) {
+void philosopher(int id) {
     for (int i = 0; i < MEALS; ++i) {
-        think(*(int*)id);
-        grab_forks(*(int*)id);
-        eat(*(int*)id, i + 1);
-        put_away_forks(*(int*)id);
+        think(id);
+        grab_forks(id);
+        eat(id, i + 1);
+        put_away_forks(id);
     }
-    return NULL;
+    exit(EXIT_SUCCESS);
 }
 
 int main(void) {
@@ -113,14 +115,32 @@ int main(void) {
         if (semctl(SEMID, i, SETVAL, 1) < 0)
             err(EXIT_FAILURE, "failed to initialize semaphore %d", i);
 
-    /* create LEN(PHILOSOPHERS) threads and run philosopher on them */
-    pthread_t threads[LEN(PHILOSOPHERS)];
-    for (int i = 0; i < (int)LEN(threads); ++i)
-        pthread_create(&threads[i], NULL, philosopher, &FORKS[i]);
+    /* create LEN(PHILOSOPHERS) processes */
+    while (created < (int)LEN(PHILOSOPHERS)) {
+        pid_t child = fork();
 
-    /* join created threads */
-    for (int i = 0; i < (int)LEN(threads); ++i)
-        pthread_join(threads[i], NULL);
+        /*
+         * if failed creating process terminate
+         * all created previosly and exit
+         *
+         * if in the child process run the philosopher function
+         * everything after the else if is run only in the parent process
+         * because philosopher function exits
+         */
+        if (child < 0)
+            handle_fail();
+        else if (child == 0)
+            philosopher(created);
+
+        /*
+         * in the parent process add child to the children list
+         */
+        children[created++] = child;
+    }
+
+    /* wait until all philosophers finish before unallocating semaphores */
+    while(wait(NULL) > 0)
+        continue;
 
     /* remove the allocated semaphores */
     if (semctl(SEMID, LEN(PHILOSOPHERS), IPC_RMID) < 0)

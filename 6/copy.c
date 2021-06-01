@@ -87,21 +87,41 @@ static inline void copy_read_write(int fd_from, int fd_to) {
 }
 
 static inline void copy_mmap(int fd_from, int fd_to) {
+    /* obtain source file size */
     struct stat stat;
     if (fstat(fd_from, &stat) < 0)
         err(EXIT_FAILURE, "failed to fstat source file");
+    /* set the target file size to the source file size */
     if (ftruncate(fd_to, stat.st_size) != 0)
         err(EXIT_FAILURE, "failed to ftruncate target file");
 
+    /*
+     * mmap source file
+     *
+     * first argument is a hint to influence the return value,
+     * NULL means ignore the hint
+     *
+     * mmap stat.st_size length bytes
+     * PROT_READ for read permission
+     * MAP_PRIVATE means changes are visible only
+     * for this process and discarded afterwards
+     * fd_from is the file descriptor of the source file
+     * last argument is the file offset - we need to start from 0
+     */
     char* from = mmap(NULL,
-                            stat.st_size,
-                            PROT_READ,
-                            MAP_PRIVATE,
-                            fd_from,
-                            0);
+                      stat.st_size,
+                      PROT_READ,
+                      MAP_PRIVATE,
+                      fd_from,
+                      0);
     if (from == MAP_FAILED)
         err(EXIT_FAILURE, "failed to mmap source file");
 
+    /*
+     * mmap target file similarly to the source file
+     * PROT_WRITE used for writing permission
+     * MAP_SHARED for persistant change
+     */
     char* to = mmap(NULL,
                     stat.st_size,
                     PROT_WRITE,
@@ -111,8 +131,13 @@ static inline void copy_mmap(int fd_from, int fd_to) {
     if (to == MAP_FAILED)
         err(EXIT_FAILURE, "failed to mmap target file");
 
+    /* copy to to from from stat.st_size bytes */
     memcpy(to, from, stat.st_size);
 
+    /*
+     * technicall you don't need to munmap because
+     * it will happen when process exits
+     */
     if (munmap(from, stat.st_size) != 0)
         err(EXIT_FAILURE, "failed to munmap source file");
     if (munmap(to, stat.st_size) != 0)
@@ -132,6 +157,10 @@ int main(int argc, char* argv[]) {
     int opt;
     bool use_mmap = true;
 
+    /* two flag arguments
+     * -h for usage and
+     * -m to specify if mmap or read/write is used
+     */
     while ((opt = getopt(argc, argv, "hm")) != -1) {
         switch (opt) {
         case 'm':
@@ -144,15 +173,21 @@ int main(int argc, char* argv[]) {
     }
 
 
+    /* if supplied any other than 2 positional argument print usage and exit */
     if (argc - optind != 2)
         usage(argv[0]);
 
+    /* open source file specified by first positional argument for reading */
     int from = open(argv[optind], O_RDONLY);
     if (from < 0)
         err(EXIT_FAILURE, "failed to open source file");
 
-    // mmap needs read permission even for just writing (?)
-    // O_CREAT | O_EXCL fails if file exists
+    /*
+     * open target file specified by second positional argument
+     * mmap needs read permission even for just writing (?)
+     * O_CREAT | O_EXCL fails if file exists
+     * 0666 for rw-rw-rw- permissions
+     */
     int to = open(argv[optind + 1], O_RDWR | O_CREAT | O_EXCL, 0666);
     if (to < 0)
         err(EXIT_FAILURE, "failed to create target file");
