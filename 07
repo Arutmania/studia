@@ -1,0 +1,7 @@
+##
+
+#MDEF dollars
+I have $$ $amount
+#MEND
+
+#MCALL dollars amount=100

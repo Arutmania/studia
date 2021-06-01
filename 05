@@ -1,0 +1,5 @@
+#MDEF hi
+hi $name
+#MEND
+
+#MCALL hi

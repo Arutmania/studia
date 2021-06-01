@@ -1,0 +1,14 @@
+#MDEF overwrite
+this is the original macro body
+#MEND
+
+this is a free text
+#MCALL overwrite
+
+#MDEF overwrite
+this is the overwritten macro body
+#MEND
+
+this is a free text
+#MCALL overwrite
+#MCALL overwrite
