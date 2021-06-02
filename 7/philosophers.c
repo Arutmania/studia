@@ -62,9 +62,9 @@ static inline void grab_forks(int i) {
     philosophers[i].state = HUNGRY;
     /* test conditionally unlocks philosopher given by i - means he is eating */
     test(i);
-    /* if test didn't unlock the philosopher mutex go to sleep */
-    pthread_mutex_unlock(&mutex);
     /* unlock mutex after critical section */
+    pthread_mutex_unlock(&mutex);
+    /* if test didn't unlock the philosopher mutex go to sleep */
     pthread_mutex_lock(&philosophers[i].mutex);
 }
 
@@ -77,6 +77,11 @@ static inline void put_away_forks(int i) {
     pthread_mutex_lock(&mutex);
     /* intent */
     philosophers[i].state = THINKING;
+    /*
+     * after changing i-th philosopher state check if his neighbors can use
+     * forks conditionally unlocking the mutex will allow their processes
+     * 'grab_forks' to wake up
+     */
     test(l);
     test(r);
     /* end of critical section */
