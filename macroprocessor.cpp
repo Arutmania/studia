@@ -212,7 +212,6 @@ private:
                      while (!std::isspace(ss.peek()) && ss.get(c))
                          parameter.push_back(c);
 
-                     // TODO: change $parameter doesn't have to preceeded by whitespace
                      if (parameter == "$")
                          sw.os.put('$');
                      else if (parameter == "__name")
@@ -232,10 +231,6 @@ private:
         }
 
         static std::string read_body(Switch& sw) {
-            // TODO: change to the document
-            // macro name must be followed by newline, or rather any whitespace,
-            // and newline. after newline macro body begins
-
             auto body = std::string {};
             char c;
 
@@ -247,7 +242,6 @@ private:
                     break;
 
             while (sw.get(c)) {
-                // TODO: change # is special inside macro body as well
                 if (c != '#') {
                     body.push_back(c);
                 } else {
