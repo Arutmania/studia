@@ -356,17 +356,17 @@ private:
 
 int main (int argc, char* argv[]) try {
     if (argc > 2) {
-        if (std::filesystem::exists(argv[1]))
+        if (!std::filesystem::exists(argv[1]))
             throw Switch::Exception { Switch::Error::SOURCE_FILE_MISSING };
 
-        if (!std::filesystem::exists(argv[2]))
+        if (std::filesystem::exists(argv[2]))
             throw Switch::Exception { Switch::Error::TARGET_FILE_EXISTS };
 
         auto is = std::ifstream(argv[1]);
         auto os = std::ofstream(argv[2]);
         Switch(argv[1], is, os).run();
     } else if (argc > 1) {
-        if (std::filesystem::exists(argv[1]))
+        if (!std::filesystem::exists(argv[1]))
             throw Switch::Exception { Switch::Error::SOURCE_FILE_MISSING };
 
         auto is = std::ifstream(argv[1]);
