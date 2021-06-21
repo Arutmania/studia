@@ -259,6 +259,9 @@ def parse_args(parser):
 
     # verify sizes
     # if uniform create uniform vector of specified size
+    if args.A.shape == (1,):
+        args.A = np.reshape(args.A, (1, 1))
+
     if args.A.shape[0] != args.A.shape[1]:
         parser.error("A should be a square NxN matrix")
 
