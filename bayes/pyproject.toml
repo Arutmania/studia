@@ -1,24 +1,15 @@
 [tool.poetry]
-name = "earin"
+name = "bayes"
 version = "0.1.0"
 description = ""
 authors = ["Piotrek Kochański <khnsky@khnsky.cc>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = "^1.20.1"
-pygame = "^2.0.1"
-torch = "^1.8.1"
-matplotlib = "^3.4.2"
-sklearn = "^0.0"
-imageio = "^2.9.0"
-gym = "^0.18.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-pylint = "^2.7.2"
-mypy = "^0.812"
-black = "^20.8b1"
+black = "^21.6b0"
+pylint = "^2.8.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -206,7 +206,7 @@ class Net:
             for samples in counters.values():
                 total = sum(samples.values())
                 for value, count in samples.items():
-                    samples[value] = count / total
+                    samples[value] = count / total if total != 0 else 0
 
             return counters
 
