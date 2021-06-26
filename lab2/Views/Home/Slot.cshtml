@@ -1,0 +1,41 @@
+@using System.Collections.Generic;
+@using System;
+
+@model SlotModel
+
+@{
+    ViewData["Title"] = Model.Room;
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="center container-fluid">
+    <form asp-action="SetSlot" method="post">
+        <div class="form-group">
+            <label for="group">group</label>
+            <select id="group" asp-for="SelectedGroup" asp-items="@Model.Groups" required></select>
+        </div>
+        <div class="form-group">
+            <label for="lecture">lecture</label>
+            <select id="lecture" asp-for="SelectedLecture" asp-items="@Model.Lectures" required></select>
+        </div>
+        <div class="form-group">
+            <label for="teacher">teacher</label>
+            <select id="teacher" asp-for="SelectedTeacher" asp-items="@Model.Teachers" required></select>
+        </div>
+        <input  asp-for="Room" value=@Model.Room type="hidden"\>
+        <input  asp-for="Day"  value=@Model.Day  type="hidden"\>
+        <input  asp-for="Time" value=@Model.Time type="hidden"\>
+
+        <div class="btn-group">
+            <input type="submit" class="btn btn-sm btn-success" value="save"/>
+            <a class="btn btn-sm btn-danger" 
+               asp-action="ClearSlot" 
+               method="post" 
+               asp-route-room=@Model.Room
+               asp-route-day=@Model.Day 
+               asp-route-time=@Model.Time>
+                clear
+            </a>
+        </div>
+    </form>
+</div>

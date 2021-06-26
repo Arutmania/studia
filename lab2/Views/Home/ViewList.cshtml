@@ -1,0 +1,51 @@
+@using System.Collections.Generic;
+@using System;
+
+@model ListModel
+
+@{
+    ViewData["Title"] = Model.Type;
+
+    var addFunction = default(String);
+    switch (Model.Type) {
+    case "Groups":
+        addFunction = "AddGroup";
+        break;
+    case "Lectures":
+        addFunction = "AddLecture";
+        break;
+    case "Rooms":
+        addFunction = "AddRoom";
+        break;
+    case "Teachers":
+        addFunction = "AddTeacher";
+        break;
+    }
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="center container-fluid table-responsive">
+    <table class="table table-stripped">
+        @foreach (var elem in Model.List) {
+            <tr>
+                <td>@elem</td>
+                <td>
+                    <a 
+                        asp-action="DeleteListElem" method="post"
+                        asp-route-type=@Model.Type asp-route-elem=@elem
+                        class="btn btn-sm btn-danger btn-block">
+                        delete
+                    </a>
+                </td>
+            </tr>
+        }
+
+        <form asp-action=@addFunction method="post">
+            <td>
+                <input type="text" name="elem"/>
+            </td>
+            <td>
+                <input type="submit" class="btn btn-sm btn-block btn-success" value="add"/>
+            </td>
+        </form>
+</table>
