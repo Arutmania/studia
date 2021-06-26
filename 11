@@ -1,0 +1,4 @@
+#MDEF name
+this is body of the macro named: $__name
+#MEND
+#MCALL name

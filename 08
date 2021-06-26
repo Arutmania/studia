@@ -1,0 +1,6 @@
+#MDEF macro
+123$param123
+$parameter
+#MEND
+
+#MCALL macro param=test

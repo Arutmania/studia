@@ -1,0 +1,5 @@
+#MDEF hello
+hello $w !
+#MEND
+
+#MCALL hello w=world

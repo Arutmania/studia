@@ -1,0 +1,5 @@
+#MDEF noparams
+this macro uses no params
+#MEND
+
+#MCALL noparams
