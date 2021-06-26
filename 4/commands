@@ -1,0 +1,75 @@
+// Enter READ/WRITE commands into this file
+// READ <OPTIONAL number type: bin/hex/oct> <virtual memory address or random>
+// WRITE <OPTIONAL number type: bin/hex/oct> <virtual memory address or random>
+//READ bin 100
+//READ 19
+//WRITE hex CC32
+//READ bin 100000000000000
+//READ bin 100000000000000
+//WRITE bin 110000000000001
+//WRITE random
+
+READ hex 00000
+READ hex 04000
+READ hex 08000
+READ hex 0c000
+READ hex 10000
+READ hex 14000
+READ hex 18000
+READ hex 1c000
+READ hex 20000
+READ hex 24000
+READ hex 28000
+READ hex 2c000
+READ hex 30000
+READ hex 34000
+READ hex 38000
+READ hex 3c000
+READ hex 40000
+READ hex 44000
+READ hex 48000
+READ hex 4c000
+READ hex 50000
+READ hex 54000
+READ hex 58000
+READ hex 5c000
+READ hex 60000
+READ hex 64000
+READ hex 68000
+READ hex 6c000
+READ hex 70000
+READ hex 74000
+READ hex 78000
+READ hex 7c000
+READ hex 80000
+READ hex 84000
+READ hex 88000
+READ hex 8c000
+READ hex 90000
+READ hex 94000
+READ hex 98000
+READ hex 9c000
+READ hex a0000
+READ hex a4000
+READ hex a8000
+READ hex ac000
+READ hex b0000
+READ hex b4000
+READ hex b8000
+READ hex bc000
+READ hex c0000
+READ hex c4000
+READ hex c8000
+READ hex cc000
+READ hex d0000
+READ hex d4000
+READ hex d8000
+READ hex dc000
+READ hex e0000
+READ hex e4000
+READ hex e8000
+READ hex ec000
+READ hex f0000
+READ hex f4000
+READ hex f8000
+READ hex fc000
