@@ -1,0 +1,7 @@
+- [shell programming](1): optionally recursive renaming of files using sed.  
+- [processes and signals](2): process communication using signals.  
+- [scheduling](3): process scheduling methods.  
+- [memory management](4): virtual memory page replacement algorithms.  
+- [synchronization](5): dining philosophers problem using processes and semaphores.  
+- [I/O operations](6): copying files using mmap or read/write syscalls.  
+- [threads programming](7): dinning philosophers problem using threads and mutexes.  
